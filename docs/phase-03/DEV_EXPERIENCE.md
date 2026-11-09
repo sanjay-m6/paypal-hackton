@@ -55,3 +55,4 @@ A lightweight PostgreSQL 16 container pre-configured with:
 - Port: `5432`
 - Health check polling `pg_isready`
 - Persistent volume `pgdata` for local state
+

@@ -1,4 +1,4 @@
-﻿# scripts/validate.ps1 — Full Quality Gate & Pre-Commit Validator
+# scripts/validate.ps1 — Full Quality Gate & Pre-Commit Validator
 # Runs Rust fmt, tests, frontend tsc, and production build
 
 Write-Host "==========================================================" -ForegroundColor Cyan
@@ -48,3 +48,4 @@ if ($allPassed) {
     Write-Host " ❌ ONE OR MORE QUALITY GATES FAILED. Review errors above." -ForegroundColor Red
 }
 Write-Host "==========================================================" -ForegroundColor Cyan
+

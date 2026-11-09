@@ -59,3 +59,4 @@ jobs:
 
       - name: Build Vite production bundle
         run: cd frontend && npm run build
+

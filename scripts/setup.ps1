@@ -1,4 +1,4 @@
-﻿# scripts/setup.ps1 — Platform Setup & Environment Initializer
+# scripts/setup.ps1 — Platform Setup & Environment Initializer
 # Team Lead: Sanjay · AI Engineer: Kaviya
 
 Write-Host "==========================================================" -ForegroundColor Cyan
@@ -57,3 +57,4 @@ Write-Host "`n==========================================================" -Foreg
 Write-Host " Setup complete! Ready for development." -ForegroundColor Cyan
 Write-Host " Run 'scripts/validate.ps1' to run all verification checks." -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
+
