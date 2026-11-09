@@ -149,12 +149,15 @@ Every phase prompt must define objective, prerequisites, owner,
 reviewer, files/modules, contracts, implementation tasks, tests,
 security checks, acceptance criteria, demo evidence, and handoff.
 
-## Completion gate
+## Completion gate & mandatory user approval
 
-A phase is complete only when acceptance criteria pass, relevant tests
-are run, security-sensitive changes are reviewed, documentation is
-updated, and the other team member accepts the handoff. Otherwise label
-it `BLOCKED`, `IN PROGRESS`, or `PARTIALLY COMPLETE`.
+A phase is complete only when:
+1. Acceptance criteria pass, relevant tests are run, and documentation is updated.
+2. The application is launched (UI and backend running) so the user can interact with and inspect the system.
+3. The user is presented with a complete list of completed features, components, and modules.
+4. The user is asked to inspect the UI and confirm all components are working properly.
+5. **STRICT REQUIREMENT:** Never begin building the next phase without explicit user approval. Always wait for the user's review and sign-off before proceeding.
+
 
 ## Explicit non-goals
 

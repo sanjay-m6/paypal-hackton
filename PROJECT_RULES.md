@@ -7,6 +7,14 @@ agents, generated code, reviews, phase prompts, tests, and releases.
 >
 > Every task has one owner and one reviewer. With two members, the
 > reviewer is always the other person.
+>
+> 🛑 **MANDATORY USER APPROVAL GATE (STRICT RULE):**
+> Upon completing any phase:
+> 1. Launch/open the application so the user can visually and interactively inspect it.
+> 2. Present a comprehensive list of all implemented features, modules, and components.
+> 3. Ask the user to check the UI and verify that all components are working properly.
+> 4. **NEVER start building the next phase without explicit user approval.** Always wait for the user's review and go-ahead.
+
 
 ---
 
@@ -314,3 +322,14 @@ impact/threat assessment, compensating controls, approver (Sanjay for
 architecture/security, module owner for implementation), review/expiry
 date, tests, and evidence. Temporary exceptions must not silently become
 permanent.
+
+## 16. Mandatory Phase-by-Phase Interactive Review & User Approval Gate
+
+1. **No Silent Phase Progression:** The AI agent and engineering team must **never** advance to or begin building the next phase without explicit, written user approval.
+2. **Interactive Application Launch:** At the completion of each phase, the application must be launched (e.g. frontend dev server and backend API running) so the user can interact directly with the running software.
+3. **Component & Module Verification Checklist:** The agent must present a detailed breakdown of:
+   - All completed features in the phase.
+   - All created/updated components, modules, and crates.
+   - Verification commands run and test evidence.
+4. **User Verification Prompt:** The agent must explicitly ask the user to inspect the UI, verify components and modules, and test workflows before requesting approval to proceed.
+
