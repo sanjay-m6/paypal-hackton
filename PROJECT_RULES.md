@@ -190,6 +190,11 @@ agents, generated code, reviews, phase prompts, tests, and releases.
    labelled.
 9. Animation must not obscure status, delay workflows, or reduce
    accessibility.
+10. Mandatory UI Theme & Stack: Always use shadcn/ui components with a
+    clean, light/white neumorphic theme (`--neu-bg: #e0e5ec` or soft-white
+    dual-shadow aesthetic with GSAP animations via `useGSAP`). Never use
+    raw HTML when a shadcn component can be wrapped.
+
 
 ## 8. Code quality
 
