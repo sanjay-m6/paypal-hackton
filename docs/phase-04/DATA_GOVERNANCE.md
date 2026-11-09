@@ -38,3 +38,4 @@ When a tenant or customer exercises an authorized erasure request:
 1. Customer identifiers in `transactions` (`customer_id`, `email`, `ip_address`) are overwritten with an irreversible cryptographic HMAC hash (`HMAC-SHA256(customer_id, tenant_salt)`).
 2. Financial amounts, currencies, timestamps, policy reason codes, and dispute records are preserved for legal and financial audit obligations without linking back to natural persons.
 3. The erasure action itself is logged in `audit_events` with the operator ID and cryptographic hash.
+
