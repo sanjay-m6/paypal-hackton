@@ -76,4 +76,3 @@ impl PlatformError {
 
 /// Alias used throughout the platform.
 pub type PlatformResult<T> = Result<T, PlatformError>;
-

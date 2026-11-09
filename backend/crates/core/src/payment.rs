@@ -30,16 +30,8 @@ impl PaymentStatus {
         match self {
             Self::Created => &[Self::Authorized, Self::Failed],
             Self::Authorized => &[Self::Captured, Self::Voided, Self::Failed],
-            Self::Captured => &[
-                Self::Refunded,
-                Self::PartiallyRefunded,
-                Self::Disputed,
-            ],
-            Self::PartiallyRefunded => &[
-                Self::Refunded,
-                Self::PartiallyRefunded,
-                Self::Disputed,
-            ],
+            Self::Captured => &[Self::Refunded, Self::PartiallyRefunded, Self::Disputed],
+            Self::PartiallyRefunded => &[Self::Refunded, Self::PartiallyRefunded, Self::Disputed],
             Self::Refunded => &[],
             Self::Voided => &[],
             Self::Failed => &[],
@@ -121,5 +113,3 @@ mod tests {
         assert!(PaymentStatus::Failed.valid_transitions().is_empty());
     }
 }
-
-

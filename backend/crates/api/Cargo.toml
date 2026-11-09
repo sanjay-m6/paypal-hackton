@@ -11,6 +11,8 @@ payment-agents = { path = "../agents" }
 payment-paypal = { path = "../paypal" }
 payment-audit = { path = "../audit" }
 axum = { workspace = true }
+argon2 = { workspace = true }
+jsonwebtoken = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true }
 tower-http = { workspace = true }
@@ -19,4 +21,6 @@ tracing-subscriber = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 uuid = { workspace = true }
+rust_decimal = { workspace = true }
 dotenvy = { workspace = true }
+password-hash = "0.5"

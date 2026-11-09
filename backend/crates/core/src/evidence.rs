@@ -26,4 +26,3 @@ pub struct EvidenceRef {
     pub reference: String,
     pub collected_at: Timestamp,
 }
-

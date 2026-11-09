@@ -41,4 +41,3 @@ pub struct PolicyRule {
     pub priority: u32,
     pub enabled: bool,
 }
-

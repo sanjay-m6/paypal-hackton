@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import {
   Cpu,
   Database,
@@ -46,6 +46,17 @@ interface EvaluationResult {
   correlation_id: string
 }
 
+interface LoginResponse {
+  access_token: string
+  token_type: string
+  expires_in: number
+  user_id: string
+  tenant_id: string
+  role: string
+}
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'
+
 // Synthetic scenarios from scripts/seed_data.json
 const SYNTHETIC_SCENARIOS = [
   {
@@ -91,6 +102,13 @@ export default function Phase2Architecture() {
   const [loadingAgents, setLoadingAgents] = useState(true)
   const [evaluating, setEvaluating] = useState(false)
   const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null)
+  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [tenantId, setTenantId] = useState<string | null>(null)
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [loggingIn, setLoggingIn] = useState(false)
   const [amount, setAmount] = useState('249.50')
   const [email, setEmail] = useState('alice@example.com')
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null)
@@ -104,25 +122,64 @@ export default function Phase2Architecture() {
   const [piiCustomerId, setPiiCustomerId] = useState('cust_998124')
   const [isAnonymized, setIsAnonymized] = useState(false)
 
-  // Fetch live agent descriptors from Axum backend
+  // Fetch protected agent descriptors after a successful login.
   useEffect(() => {
+    if (!accessToken) {
+      setLoadingAgents(false)
+      return
+    }
+
     axios
-      .get<AgentDescriptor[]>('http://127.0.0.1:3001/api/v1/agents')
-      .then((res) => setAgents(res.data))
-      .catch((err) => console.error('Failed to load agents from backend', err))
+      .get<AgentDescriptor[]>(`${API_BASE_URL}/api/v1/agents`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        setAgents(res.data)
+        setApiError(null)
+      })
+      .catch(() => {
+        setApiError('Could not load protected API data. Please sign in again.')
+        setAccessToken(null)
+      })
       .finally(() => setLoadingAgents(false))
-  }, [])
+  }, [accessToken])
+
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setLoggingIn(true)
+    setLoginError(null)
+
+    try {
+      const response = await axios.post<LoginResponse>(`${API_BASE_URL}/api/v1/auth/login`, {
+        email: loginEmail,
+        password: loginPassword,
+      })
+      setAccessToken(response.data.access_token)
+      setTenantId(response.data.tenant_id)
+      setLoginPassword('')
+      setLoadingAgents(true)
+    } catch {
+      setLoginError('Sign-in failed. Check the credentials and API connection.')
+    } finally {
+      setLoggingIn(false)
+    }
+  }
 
   // Trigger live payment risk evaluation
   const handleEvaluate = async (customAmount?: string, customEmail?: string) => {
+    if (!accessToken || !tenantId) {
+      setApiError('Sign in before requesting an evaluation.')
+      return
+    }
     setEvaluating(true)
+    setApiError(null)
     const evalAmount = customAmount || amount
     const evalEmail = customEmail || email
 
     try {
-      const res = await axios.post<EvaluationResult>('http://127.0.0.1:3001/api/v1/payments/evaluate', {
+      const res = await axios.post<EvaluationResult>(`${API_BASE_URL}/api/v1/payments/evaluate`, {
         transaction_id: '11111111-1111-1111-1111-111111111111',
-        tenant_id: '22222222-2222-2222-2222-222222222222',
+        tenant_id: tenantId,
         amount: evalAmount,
         currency: 'USD',
         payment_method: 'PAYPAL',
@@ -132,10 +189,12 @@ export default function Phase2Architecture() {
           ip_address: '192.168.1.1',
         },
         idempotency_key: '33333333-3333-3333-3333-333333333333',
+      }, {
+        headers: { Authorization: `Bearer ${accessToken}` },
       })
       setEvaluationResult(res.data)
-    } catch (err) {
-      console.error('Evaluation request failed', err)
+    } catch {
+      setApiError('Evaluation request failed. Check the request and API connection.')
     } finally {
       setEvaluating(false)
     }
@@ -148,21 +207,77 @@ export default function Phase2Architecture() {
     handleEvaluate(scenario.amount, scenario.email)
   }
 
+  if (!accessToken) {
+    return (
+      <div className="w-full max-w-md mx-auto py-16">
+        <NeuCard className="space-y-5 p-7">
+          <div>
+            <h2 className="text-xl font-black text-[var(--neu-text)]">Operator sign in</h2>
+            <p className="mt-2 text-sm text-[var(--neu-muted)]">
+              Use an operator account provisioned in the backend.
+            </p>
+          </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <NeuInput
+              type="email"
+              autoComplete="username"
+              value={loginEmail}
+              onChange={(event) => setLoginEmail(event.target.value)}
+              placeholder="Email"
+              aria-label="Operator email"
+              required
+            />
+            <NeuInput
+              type="password"
+              autoComplete="current-password"
+              value={loginPassword}
+              onChange={(event) => setLoginPassword(event.target.value)}
+              placeholder="Password"
+              aria-label="Operator password"
+              required
+            />
+            {loginError && <p role="alert" className="text-sm text-red-600">{loginError}</p>}
+            {apiError && <p role="alert" className="text-sm text-red-600">{apiError}</p>}
+            <NeuButton type="submit" disabled={loggingIn} className="w-full">
+              {loggingIn ? 'Signing in…' : 'Sign in'}
+            </NeuButton>
+          </form>
+        </NeuCard>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full max-w-5xl mx-auto space-y-8 py-4">
+      <div className="flex items-center justify-between text-xs text-[var(--neu-muted)]">
+        <span>Authenticated · tenant {tenantId}</span>
+        <button
+          type="button"
+          className="font-bold text-[var(--neu-blue)]"
+          onClick={() => {
+            setAccessToken(null)
+            setTenantId(null)
+            setAgents([])
+            setEvaluationResult(null)
+          }}
+        >
+          Sign out
+        </button>
+      </div>
+      {apiError && <p role="alert" className="text-sm text-red-600">{apiError}</p>}
       {/* Platform Architecture & Data Governance Header */}
       <NeuCard className="p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--neu-blue)] bg-white/60 px-3 py-1 rounded-xl border border-white">
               <CheckCircle2 className="h-3.5 w-3.5 text-[var(--neu-blue)]" />
-              Phase 4: Database Architecture & Data Governance Active
+              Phases 5–6: Authentication & API Foundation
             </div>
             <h2 className="text-2xl font-black text-[var(--neu-text)] tracking-tight">
               Payment Security Platform & Data Governance
             </h2>
             <p className="text-xs text-[var(--neu-muted)] max-w-2xl leading-relaxed">
-              Multi-tenant row-level boundary enforcement (WHERE tenant_id = $1), 24h/90d/180d/7y lifecycle retention tiers, PII cryptographic HMAC pseudonymization, and zero-storage cardholder invariants.
+              Protected operator access, tenant-bound payment evaluation, and deterministic policy fallback. Agent execution and configured policy rules are still future work.
             </p>
           </div>
 
@@ -298,7 +413,7 @@ export default function Phase2Architecture() {
                 {evaluating ? (
                   <>
                     <Activity className="h-4 w-4 animate-spin text-[var(--neu-blue)]" />
-                    Evaluating via 13-Agent Mesh...
+                    Evaluating with the current policy engine...
                   </>
                 ) : (
                   <>
@@ -383,7 +498,7 @@ export default function Phase2Architecture() {
                 </div>
                 <h4 className="text-sm font-bold text-[var(--neu-text)]">Awaiting Evaluation Request</h4>
                 <p className="text-xs text-[var(--neu-muted)] max-w-xs leading-relaxed">
-                  Click "Execute Deterministic Evaluation" to trigger the Axum backend router, parallel agent dispatch, and policy engine.
+                  The API currently has no policy rules or live agents configured, so requests safely return MANUAL_REVIEW.
                 </p>
               </NeuCard>
             )}
@@ -424,7 +539,7 @@ export default function Phase2Architecture() {
                           : 'bg-amber-100 text-amber-700'
                       }`}
                     >
-                      Expected: {sc.expected}
+                      Target outcome: {sc.expected}
                     </span>
                   </div>
 

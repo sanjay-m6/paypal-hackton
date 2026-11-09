@@ -1,5 +1,5 @@
-use std::fmt::Debug;
 use payment_core::{AgentId, AgentMetadata, AgentRequest, AgentResponse, PlatformError};
+use std::fmt::Debug;
 
 /// Trait that all AI agents must implement.
 ///
@@ -15,8 +15,5 @@ pub trait Agent: Send + Sync + Debug {
     fn metadata(&self) -> &AgentMetadata;
 
     /// Execute the agent's analysis on the given request.
-    async fn execute(
-        &self,
-        request: AgentRequest,
-    ) -> Result<AgentResponse, PlatformError>;
+    async fn execute(&self, request: AgentRequest) -> Result<AgentResponse, PlatformError>;
 }

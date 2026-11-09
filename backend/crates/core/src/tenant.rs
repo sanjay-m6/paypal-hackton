@@ -19,4 +19,3 @@ pub struct TenantContext {
     pub roles: Vec<String>,
     pub permissions: Vec<String>,
 }
-

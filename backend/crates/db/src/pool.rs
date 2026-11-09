@@ -1,6 +1,6 @@
-use std::time::Duration;
-use sqlx::postgres::PgPoolOptions;
 use payment_core::PlatformError;
+use sqlx::postgres::PgPoolOptions;
+use std::time::Duration;
 
 /// Configuration options for the database connection pool.
 #[derive(Debug, Clone)]

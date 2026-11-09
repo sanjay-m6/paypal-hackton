@@ -3,7 +3,9 @@
 // The PolicyEngine evaluates agent findings against a deterministic rule set.
 // It must NEVER delegate decisions to an LLM or any non-deterministic process.
 
-use payment_core::{AgentFinding, PolicyDecision, PolicyOutcome, PolicyRule, Timestamp, TraceContext};
+use payment_core::{
+    AgentFinding, PolicyDecision, PolicyOutcome, PolicyRule, Timestamp, TraceContext,
+};
 
 /// Deterministic policy evaluation engine.
 ///
@@ -33,11 +35,7 @@ impl PolicyEngine {
     /// Given the same rule set and the same findings, this function will
     /// **always** produce the same `PolicyOutcome`. No randomness, no LLM
     /// calls, no network I/O.
-    pub fn evaluate(
-        &self,
-        _findings: &[AgentFinding],
-        trace: &TraceContext,
-    ) -> PolicyOutcome {
+    pub fn evaluate(&self, _findings: &[AgentFinding], trace: &TraceContext) -> PolicyOutcome {
         if self.rules.is_empty() {
             tracing::warn!("No policy rules configured — defaulting to ManualReview");
             return PolicyOutcome {
@@ -83,7 +81,9 @@ mod tests {
 
         assert_eq!(outcome1.decision, PolicyDecision::ManualReview);
         assert_eq!(outcome2.decision, PolicyDecision::ManualReview);
-        assert_eq!(outcome1.reason_codes, vec!["no_rules_configured".to_string()]);
+        assert_eq!(
+            outcome1.reason_codes,
+            vec!["no_rules_configured".to_string()]
+        );
     }
 }
-

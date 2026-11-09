@@ -67,8 +67,14 @@ mod tests {
         let fresh_signals = now - Duration::days(89);
         let expired_signals = now - Duration::days(91);
 
-        assert!(!RetentionPolicy::is_session_signal_expired(fresh_signals, now));
-        assert!(RetentionPolicy::is_session_signal_expired(expired_signals, now));
+        assert!(!RetentionPolicy::is_session_signal_expired(
+            fresh_signals,
+            now
+        ));
+        assert!(RetentionPolicy::is_session_signal_expired(
+            expired_signals,
+            now
+        ));
     }
 
     #[test]
@@ -77,8 +83,14 @@ mod tests {
         let fresh_finding = now - Duration::days(170);
         let expired_finding = now - Duration::days(181);
 
-        assert!(!RetentionPolicy::is_agent_finding_expired(fresh_finding, now));
-        assert!(RetentionPolicy::is_agent_finding_expired(expired_finding, now));
+        assert!(!RetentionPolicy::is_agent_finding_expired(
+            fresh_finding,
+            now
+        ));
+        assert!(RetentionPolicy::is_agent_finding_expired(
+            expired_finding,
+            now
+        ));
     }
 
     #[test]

@@ -57,11 +57,11 @@ export default function NeumorphismPage() {
               Payment Security Platform
             </h1>
             <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/70 border border-white text-[var(--neu-blue)]">
-              Phase 2 Active
+              Backend Foundation
             </span>
           </div>
           <p className="text-xs text-[var(--neu-muted)] mt-0.5">
-            Multi-Agent Intelligence · Rust Core Engine · Neumorphic (Soft UI) Theme
+            Authenticated API · Deterministic Policy Core · Neumorphic (Soft UI) Theme
           </p>
         </div>
 
@@ -212,7 +212,7 @@ export default function NeumorphismPage() {
 
       {/* Footer */}
       <footer className="mt-12 text-center text-xs text-[var(--neu-muted)]">
-        Multi-Agent AI Payment Security Platform · Team Lead: Sanjay · AI Engineer: Kaviya · Phase 2 Complete
+        Multi-Agent AI Payment Security Platform · Team Lead: Sanjay · AI Engineer: Kaviya · Foundation Phases 1–6
       </footer>
     </div>
   )

@@ -47,13 +47,23 @@ hackton/
 
 ## Getting Started
 
+1. Copy `.env.example` to `.env`.
+2. Set `JWT_SECRET` to a randomly generated secret with at least 32 bytes. Never reuse the example or commit `.env`.
+3. Optionally set `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` (at least 12 characters) to create the first local development operator. This only inserts the account if it does not already exist. Remove these values after provisioning.
+4. Start PostgreSQL with `docker compose up -d postgres`.
+
 ```bash
 # Backend
-cd backend && cargo build
+cd backend
+cargo run -p payment-api
 
 # Frontend
-cd frontend && npm install && npm run dev
+cd frontend
+npm install
+npm run dev
 ```
+
+The API applies database migrations on startup. `/api/v1/auth/login` issues a 15-minute signed bearer token; `/api/v1/agents` and `/api/v1/payments/evaluate` require it. Payment evaluation currently returns `MANUAL_REVIEW` because no policy rules or live agents are configured yet. No payment is executed.
 
 ## Phase Progress
 

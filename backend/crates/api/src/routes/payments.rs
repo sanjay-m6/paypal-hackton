@@ -1,69 +1,60 @@
-use axum::Json;
-use payment_core::dto::{
-    AgentFindingDto, PaymentEvaluationRequestDto, PaymentEvaluationResponseDto,
+use axum::{
+    Json,
+    extract::{State, rejection::JsonRejection},
 };
-use payment_core::policy::PolicyDecision;
-use payment_core::types::{AgentId, Timestamp};
-use uuid::Uuid;
+use payment_core::{
+    PlatformError,
+    dto::{PaymentEvaluationRequestDto, PaymentEvaluationResponseDto},
+    types::TraceContext,
+};
+use rust_decimal::Decimal;
 
-/// POST /api/v1/payments/evaluate
-///
-/// Evaluates inbound payment context against the agent ensemble and deterministic policy.
+use crate::{
+    middleware::{auth::AuthenticatedUser, errors::ApiError},
+    state::AppState,
+};
+
 pub async fn evaluate_payment(
-    Json(payload): Json<PaymentEvaluationRequestDto>,
-) -> Json<PaymentEvaluationResponseDto> {
-    // Generate correlation ID for this evaluation trace
-    let correlation_id = Uuid::new_v4();
+    user: AuthenticatedUser,
+    State(state): State<AppState>,
+    payload: Result<Json<PaymentEvaluationRequestDto>, JsonRejection>,
+) -> Result<Json<PaymentEvaluationResponseDto>, ApiError> {
+    let Json(payload) = payload.map_err(ApiError::from)?;
+    if !user.can_evaluate_payments() {
+        return Err(ApiError(PlatformError::Forbidden(
+            "This role cannot evaluate payments".into(),
+        )));
+    }
+    if payload.tenant_id != user.tenant_id.0 {
+        return Err(ApiError(PlatformError::TenantIsolation(
+            "Request tenant does not match the authenticated tenant".into(),
+        )));
+    }
+    if payload.amount <= Decimal::ZERO {
+        return Err(ApiError(PlatformError::Validation(
+            "Payment amount must be greater than zero".into(),
+        )));
+    }
+    if payload.customer.email.len() > 254
+        || payload.customer.customer_id.len() > 128
+        || payload.customer.ip_address.len() > 64
+    {
+        return Err(ApiError(PlatformError::Validation(
+            "Customer fields exceed their maximum length".into(),
+        )));
+    }
 
-    // Collect findings across specialist agents (deterministic simulation)
-    let findings = vec![
-        AgentFindingDto {
-            agent_id: AgentId::TransactionAnalysis,
-            agent_version: "1.0.0".to_string(),
-            finding_type: "observation".to_string(),
-            severity: "low".to_string(),
-            description: format!(
-                "Transaction amount ({:.2}) is within established baseline",
-                payload.amount
-            ),
-            confidence_value: Some(0.95),
-            confidence_note: Some("Empirical baseline comparison on 90-day transaction history".to_string()),
-            evidence_refs: vec![Uuid::new_v4()],
-        },
-        AgentFindingDto {
-            agent_id: AgentId::DeviceSession,
-            agent_version: "1.0.0".to_string(),
-            finding_type: "observation".to_string(),
-            severity: "low".to_string(),
-            description: "Device fingerprint matches customer's registered primary device".to_string(),
-            confidence_value: Some(0.98),
-            confidence_note: Some("Browser canvas, TLS client fingerprint, and OS profile match".to_string()),
-            evidence_refs: vec![Uuid::new_v4()],
-        },
-        AgentFindingDto {
-            agent_id: AgentId::BehavioralAnalysis,
-            agent_version: "1.0.0".to_string(),
-            finding_type: "observation".to_string(),
-            severity: "low".to_string(),
-            description: "Interaction cadence and checkout duration consistent with human behavior".to_string(),
-            confidence_value: Some(0.92),
-            confidence_note: Some("Form fill velocity within expected variance".to_string()),
-            evidence_refs: vec![Uuid::new_v4()],
-        },
-    ];
-
+    let trace = TraceContext::new(user.tenant_id, user.user_id);
+    let outcome = state.policy_engine.evaluate(&[], &trace);
     let response = PaymentEvaluationResponseDto {
         transaction_id: payload.transaction_id,
-        policy_decision: PolicyDecision::Allow,
-        reason_codes: vec![
-            "LOW_RISK_VERIFIED_DEVICE".to_string(),
-            "BEHAVIORAL_BASELINE_CONFIRMED".to_string(),
-        ],
-        policy_version: "1.0.0".to_string(),
-        agent_findings: findings,
-        evaluated_at: Timestamp::now(),
-        correlation_id,
+        policy_decision: outcome.decision,
+        reason_codes: outcome.reason_codes,
+        policy_version: outcome.policy_version,
+        agent_findings: Vec::new(),
+        evaluated_at: outcome.evaluated_at,
+        correlation_id: outcome.trace.0,
     };
 
-    Json(response)
+    Ok(Json(response))
 }

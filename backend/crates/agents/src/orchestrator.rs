@@ -36,11 +36,9 @@ impl Orchestrator {
 
         let result = tokio::time::timeout(self.timeout, agent.execute(request))
             .await
-            .map_err(|_| {
-                PlatformError::AgentError {
-                    agent_id: format!("{agent_id:?}"),
-                    message: format!("Agent exceeded timeout of {:?}", self.timeout),
-                }
+            .map_err(|_| PlatformError::AgentError {
+                agent_id: format!("{agent_id:?}"),
+                message: format!("Agent exceeded timeout of {:?}", self.timeout),
             })?;
 
         result

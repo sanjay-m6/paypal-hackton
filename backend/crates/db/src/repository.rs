@@ -4,10 +4,94 @@ use serde_json::Value;
 use sqlx::{PgPool, Row};
 use uuid::Uuid;
 
+use payment_core::PlatformError;
 use payment_core::payment::{PaymentMethod, PaymentStatus};
 use payment_core::policy::PolicyDecision;
 use payment_core::types::{TenantId, TransactionId, UserId};
-use payment_core::PlatformError;
+
+#[derive(Debug, Clone)]
+pub struct AuthUserModel {
+    pub id: Uuid,
+    pub tenant_id: Uuid,
+    pub password_hash: String,
+    pub role: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct UserRepository {
+    pool: PgPool,
+}
+
+impl UserRepository {
+    pub fn new(pool: PgPool) -> Self {
+        Self { pool }
+    }
+
+    pub async fn get_active_auth_user(
+        &self,
+        email: &str,
+    ) -> Result<Option<AuthUserModel>, PlatformError> {
+        let row = sqlx::query(
+            r#"
+            SELECT u.id, u.tenant_id, u.password_hash, u.role
+            FROM users u
+            INNER JOIN tenants t ON t.id = u.tenant_id
+            WHERE lower(u.email) = $1 AND u.active = TRUE AND t.active = TRUE
+            "#,
+        )
+        .bind(email)
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|error| PlatformError::DatabaseError(error.to_string()))?;
+
+        Ok(row.map(|row| AuthUserModel {
+            id: row.get("id"),
+            tenant_id: row.get("tenant_id"),
+            password_hash: row.get("password_hash"),
+            role: row.get("role"),
+        }))
+    }
+
+    pub async fn bootstrap_operator(
+        &self,
+        email: &str,
+        password_hash: &str,
+        tenant_id: Uuid,
+    ) -> Result<(), PlatformError> {
+        let mut transaction = self
+            .pool
+            .begin()
+            .await
+            .map_err(|error| PlatformError::DatabaseError(error.to_string()))?;
+
+        sqlx::query(
+            "INSERT INTO tenants (id, name) VALUES ($1, 'Local Development') ON CONFLICT (id) DO NOTHING",
+        )
+        .bind(tenant_id)
+        .execute(&mut *transaction)
+        .await
+        .map_err(|error| PlatformError::DatabaseError(error.to_string()))?;
+
+        sqlx::query(
+            r#"
+            INSERT INTO users (tenant_id, email, password_hash, role)
+            VALUES ($1, lower($2), $3, 'admin')
+            ON CONFLICT (email) DO NOTHING
+            "#,
+        )
+        .bind(tenant_id)
+        .bind(email)
+        .bind(password_hash)
+        .execute(&mut *transaction)
+        .await
+        .map_err(|error| PlatformError::DatabaseError(error.to_string()))?;
+
+        transaction
+            .commit()
+            .await
+            .map_err(|error| PlatformError::DatabaseError(error.to_string()))
+    }
+}
 
 // ---------------------------------------------------------------------------
 // 1. Tenant Repository (Multi-Tenant Registry & Boundary Verification)

@@ -40,6 +40,8 @@ rust_decimal = { version = "1", features = ["serde-with-str"] }
 # Error handling
 thiserror = "2"
 anyhow = "1"
+argon2 = "0.5"
+jsonwebtoken = "9"
 
 # Logging / Tracing
 tracing = "0.1"

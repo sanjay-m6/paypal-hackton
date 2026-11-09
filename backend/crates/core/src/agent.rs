@@ -170,4 +170,3 @@ impl PartialEq for ConfidenceLevel {
             && self.calibration_note == other.calibration_note
     }
 }
-

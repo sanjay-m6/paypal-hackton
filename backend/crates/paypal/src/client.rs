@@ -41,10 +41,7 @@ impl PayPalClient {
     }
 
     /// Capture a previously approved order. Stub — to be implemented in Phase 31.
-    pub async fn capture_order(
-        &self,
-        _order_id: &str,
-    ) -> Result<CaptureResponse, PlatformError> {
+    pub async fn capture_order(&self, _order_id: &str) -> Result<CaptureResponse, PlatformError> {
         tracing::warn!("PayPal capture_order is a stub");
         Err(PlatformError::Internal(
             "PayPal capture_order not yet configured".to_string(),
