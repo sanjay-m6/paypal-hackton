@@ -1,0 +1,15 @@
+[package]
+name = "payment-agents"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+payment-core = { path = "../core" }
+tokio = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+async-trait = "0.1"

@@ -1,0 +1,22 @@
+[package]
+name = "payment-api"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+payment-core = { path = "../core" }
+payment-db = { path = "../db" }
+payment-policy = { path = "../policy" }
+payment-agents = { path = "../agents" }
+payment-paypal = { path = "../paypal" }
+payment-audit = { path = "../audit" }
+axum = { workspace = true }
+tokio = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+dotenvy = { workspace = true }

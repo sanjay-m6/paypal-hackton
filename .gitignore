@@ -1,0 +1,38 @@
+# Build output
+/target/
+**/target/
+
+# Node
+node_modules/
+**/node_modules/
+frontend/dist/
+frontend/build/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Coverage
+coverage/
+lcov.info
+
+# Generated
+*.generated.*

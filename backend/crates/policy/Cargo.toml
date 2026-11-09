@@ -1,0 +1,13 @@
+[package]
+name = "payment-policy"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+payment-core = { path = "../core" }
+tracing = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
