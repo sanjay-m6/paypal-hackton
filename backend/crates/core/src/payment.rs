@@ -61,6 +61,7 @@ impl PaymentStatus {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum PaymentMethod {
+    #[serde(rename = "PAYPAL", alias = "PAY_PAL")]
     PayPal,
     Card,
     BankTransfer,

@@ -1,4 +1,8 @@
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
+use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -13,11 +17,21 @@ async fn main() {
         )
         .init();
 
-    tracing::info!("Starting Multi-Agent Payment Security Platform");
+    tracing::info!("Starting Multi-Agent Payment Security Platform API (Axum)");
 
-    // Build router
+    // Configure CORS for frontend access
+    let cors = CorsLayer::permissive();
+
+    // Build router with Phase 1 & Phase 2 endpoints
     let app = Router::new()
         .route("/health", get(payment_api::routes::health::health_check))
+        .route("/api/v1/health", get(payment_api::routes::health::health_check))
+        .route("/api/v1/agents", get(payment_api::routes::agents::list_agents))
+        .route(
+            "/api/v1/payments/evaluate",
+            post(payment_api::routes::payments::evaluate_payment),
+        )
+        .layer(cors)
         .layer(TraceLayer::new_for_http());
 
     // Start server

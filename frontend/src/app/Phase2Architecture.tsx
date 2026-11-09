@@ -1,0 +1,485 @@
+import { useState, useEffect } from 'react'
+import {
+  Cpu,
+  Database,
+  Lock,
+  Activity,
+  CheckCircle2,
+  ArrowRight,
+  Server,
+} from 'lucide-react'
+import { NeuCard, NeuButton, NeuInput } from '@/components/neu'
+import axios from 'axios'
+
+interface AgentDescriptor {
+  id: number
+  name: string
+  version: string
+  owner: string
+  scope: string
+  capabilities: string[]
+  timeout_ms: number
+}
+
+interface EvaluationFinding {
+  agent_id: string
+  finding_type: string
+  severity: string
+  description: string
+  confidence_value: number
+  confidence_note: string
+  evidence_refs: string[]
+}
+
+interface EvaluationResult {
+  transaction_id: string
+  policy_decision: 'ALLOW' | 'DENY' | 'STEP_UP' | 'MANUAL_REVIEW'
+  reason_codes: string[]
+  policy_version: string
+  agent_findings: EvaluationFinding[]
+  evaluated_at: string
+  correlation_id: string
+}
+
+export default function Phase2Architecture() {
+  const [agents, setAgents] = useState<AgentDescriptor[]>([])
+  const [loadingAgents, setLoadingAgents] = useState(true)
+  const [evaluating, setEvaluating] = useState(false)
+  const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null)
+  const [amount, setAmount] = useState('249.50')
+  const [email, setEmail] = useState('alice@example.com')
+  const [activeTab, setActiveTab] = useState<'evaluator' | 'agents' | 'schema' | 'threats'>('evaluator')
+
+  // Fetch live agent descriptors from Axum backend
+  useEffect(() => {
+    axios
+      .get<AgentDescriptor[]>('http://127.0.0.1:3001/api/v1/agents')
+      .then((res) => setAgents(res.data))
+      .catch((err) => console.error('Failed to load agents from backend', err))
+      .finally(() => setLoadingAgents(false))
+  }, [])
+
+  // Trigger live payment risk evaluation
+  const handleEvaluate = async () => {
+    setEvaluating(true)
+    try {
+      const res = await axios.post<EvaluationResult>('http://127.0.0.1:3001/api/v1/payments/evaluate', {
+        transaction_id: '11111111-1111-1111-1111-111111111111',
+        tenant_id: '22222222-2222-2222-2222-222222222222',
+        amount: amount,
+        currency: 'USD',
+        payment_method: 'PAYPAL',
+        customer: {
+          customer_id: 'cust_99',
+          email: email,
+          ip_address: '192.168.1.1',
+        },
+        idempotency_key: '33333333-3333-3333-3333-333333333333',
+      })
+      setEvaluationResult(res.data)
+    } catch (err) {
+      console.error('Evaluation request failed', err)
+    } finally {
+      setEvaluating(false)
+    }
+  }
+
+  return (
+    <div className="w-full max-w-5xl mx-auto space-y-8 py-4">
+      {/* Phase 2 Architecture Header Banner */}
+      <NeuCard className="p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--neu-blue)] bg-white/60 px-3 py-1 rounded-xl border border-white">
+              <CheckCircle2 className="h-3.5 w-3.5 text-[var(--neu-blue)]" />
+              Phase 2: System Architecture & Technical Design
+            </div>
+            <h2 className="text-2xl font-black text-[var(--neu-text)] tracking-tight">
+              Multi-Agent Payment Security Architecture
+            </h2>
+            <p className="text-xs text-[var(--neu-muted)] max-w-2xl leading-relaxed">
+              OpenAPI 3.1 contracts, PostgreSQL 16 relational data architecture (8 tables), pure Rust deterministic policy authority, and the 13 specialist agent mesh.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="neu-inset-sm p-3.5 rounded-2xl text-center min-w-[100px]">
+              <div className="text-xl font-black text-[var(--neu-blue)] font-mono">8</div>
+              <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">SQL Tables</div>
+            </div>
+            <div className="neu-inset-sm p-3.5 rounded-2xl text-center min-w-[100px]">
+              <div className="text-xl font-black text-[var(--neu-teal)] font-mono">13</div>
+              <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">Agents</div>
+            </div>
+            <div className="neu-inset-sm p-3.5 rounded-2xl text-center min-w-[100px]">
+              <div className="text-xl font-black text-[var(--neu-green)] font-mono">6</div>
+              <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">Trust Layers</div>
+            </div>
+          </div>
+        </div>
+      </NeuCard>
+
+      {/* Sub-Navigation Tabs */}
+      <div className="flex items-center gap-3 border-b border-white/40 pb-3">
+        <NeuButton
+          size="sm"
+          variant={activeTab === 'evaluator' ? 'inset' : 'raised'}
+          onClick={() => setActiveTab('evaluator')}
+          className="rounded-xl font-bold"
+        >
+          <Activity className="h-3.5 w-3.5 mr-1.5" />
+          Live Policy Evaluator
+        </NeuButton>
+        <NeuButton
+          size="sm"
+          variant={activeTab === 'agents' ? 'inset' : 'raised'}
+          onClick={() => setActiveTab('agents')}
+          className="rounded-xl font-bold"
+        >
+          <Cpu className="h-3.5 w-3.5 mr-1.5" />
+          Specialist Agent Mesh (13)
+        </NeuButton>
+        <NeuButton
+          size="sm"
+          variant={activeTab === 'schema' ? 'inset' : 'raised'}
+          onClick={() => setActiveTab('schema')}
+          className="rounded-xl font-bold"
+        >
+          <Database className="h-3.5 w-3.5 mr-1.5" />
+          Database Schema (8 Tables)
+        </NeuButton>
+        <NeuButton
+          size="sm"
+          variant={activeTab === 'threats' ? 'inset' : 'raised'}
+          onClick={() => setActiveTab('threats')}
+          className="rounded-xl font-bold"
+        >
+          <Lock className="h-3.5 w-3.5 mr-1.5" />
+          STRIDE Threat Matrix
+        </NeuButton>
+      </div>
+
+      {/* TAB 1: Live Policy Evaluator */}
+      {activeTab === 'evaluator' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+          {/* Left: Input Form */}
+          <NeuCard className="space-y-5 p-6">
+            <div className="flex items-center justify-between border-b border-white/60 pb-3">
+              <h3 className="text-sm font-bold text-[var(--neu-text)] flex items-center gap-2">
+                <Server className="h-4 w-4 text-[var(--neu-blue)]" />
+                Inbound Payment Request (DTO)
+              </h3>
+              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-lg bg-white/60 text-[var(--neu-muted)]">
+                POST /api/v1/payments/evaluate
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-[var(--neu-muted)] uppercase tracking-wide block mb-1">
+                  Amount ($ USD)
+                </label>
+                <NeuInput
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="249.50"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-[var(--neu-muted)] uppercase tracking-wide block mb-1">
+                  Customer Email
+                </label>
+                <NeuInput
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="alice@example.com"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="neu-inset-sm p-3 rounded-xl">
+                  <span className="text-[10px] text-[var(--neu-muted)] uppercase font-bold block">Method</span>
+                  <span className="text-xs font-bold text-[var(--neu-text)] font-mono">PAYPAL</span>
+                </div>
+                <div className="neu-inset-sm p-3 rounded-xl">
+                  <span className="text-[10px] text-[var(--neu-muted)] uppercase font-bold block">Engine Authority</span>
+                  <span className="text-xs font-bold text-[var(--neu-green)] font-mono">Pure Rust</span>
+                </div>
+              </div>
+
+              <NeuButton
+                onClick={handleEvaluate}
+                disabled={evaluating}
+                className="w-full mt-2 font-bold tracking-wide text-sm flex items-center justify-center gap-2"
+              >
+                {evaluating ? (
+                  <>
+                    <Activity className="h-4 w-4 animate-spin text-[var(--neu-blue)]" />
+                    Evaluating via 13-Agent Mesh...
+                  </>
+                ) : (
+                  <>
+                    <span>Execute Deterministic Evaluation</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </NeuButton>
+            </div>
+          </NeuCard>
+
+          {/* Right: Evaluation Result Output */}
+          <div className="space-y-4">
+            {evaluationResult ? (
+              <NeuCard className="p-6 space-y-4 border-2 border-[var(--neu-green)]/40">
+                <div className="flex items-center justify-between border-b border-white/60 pb-3">
+                  <div>
+                    <span className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">
+                      Policy Outcome
+                    </span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-lg font-black text-[var(--neu-green)] font-mono">
+                        {evaluationResult.policy_decision}
+                      </span>
+                      <span className="neu-dot bg-[var(--neu-green)] text-[var(--neu-green)]" />
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-[10px] text-[var(--neu-muted)] block">Policy Version</span>
+                    <span className="font-mono text-xs font-bold text-[var(--neu-text)]">
+                      v{evaluationResult.policy_version}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-xs font-bold text-[var(--neu-muted)] uppercase tracking-wide block mb-1.5">
+                    Reason Codes
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {evaluationResult.reason_codes.map((code, idx) => (
+                      <span
+                        key={idx}
+                        className="neu-inset-sm text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg text-[var(--neu-text)]"
+                      >
+                        {code}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-xs font-bold text-[var(--neu-muted)] uppercase tracking-wide block mb-1.5">
+                    Agent Findings ({evaluationResult.agent_findings.length})
+                  </span>
+                  <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                    {evaluationResult.agent_findings.map((f, idx) => (
+                      <div key={idx} className="neu-inset-sm p-3 rounded-xl text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-[var(--neu-blue)] font-mono">{f.agent_id}</span>
+                          <span className="text-[10px] uppercase font-semibold text-[var(--neu-green)]">
+                            Confidence: {(f.confidence_value * 100).toFixed(0)}%
+                          </span>
+                        </div>
+                        <p className="text-[var(--neu-text)]">{f.description}</p>
+                        <p className="text-[10px] text-[var(--neu-muted)] italic">{f.confidence_note}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-white/60 flex items-center justify-between text-[10px] font-mono text-[var(--neu-muted)]">
+                  <span>Trace: {evaluationResult.correlation_id.slice(0, 16)}...</span>
+                  <span>{new Date(evaluationResult.evaluated_at).toLocaleTimeString()}</span>
+                </div>
+              </NeuCard>
+            ) : (
+              <NeuCard className="p-8 text-center flex flex-col items-center justify-center min-h-[340px] space-y-3">
+                <div className="neu-inset h-16 w-16 rounded-full flex items-center justify-center text-[var(--neu-muted)]">
+                  <Cpu className="h-8 w-8 stroke-[1.5]" />
+                </div>
+                <h4 className="text-sm font-bold text-[var(--neu-text)]">Awaiting Evaluation Request</h4>
+                <p className="text-xs text-[var(--neu-muted)] max-w-xs leading-relaxed">
+                  Click "Execute Deterministic Evaluation" to trigger the Axum backend router, parallel agent dispatch, and policy engine.
+                </p>
+              </NeuCard>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: 13 Specialist Agent Mesh */}
+      {activeTab === 'agents' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {loadingAgents ? (
+              <div className="col-span-3 text-center py-12 text-sm text-[var(--neu-muted)]">
+                Loading live agent descriptors from Axum backend...
+              </div>
+            ) : (
+              agents.map((agent) => (
+                <NeuCard key={agent.id} className="p-4 space-y-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="font-mono text-xs font-black px-2 py-0.5 rounded-lg bg-white/70 text-[var(--neu-blue)]">
+                        ID: {agent.id.toString().padStart(2, '0')}
+                      </span>
+                      <span
+                        className={`text-[11px] font-bold ${
+                          agent.owner === 'Sanjay' ? 'text-[var(--neu-teal)]' : 'text-[var(--neu-orange)]'
+                        }`}
+                      >
+                        👤 {agent.owner}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold text-[var(--neu-text)]">{agent.name}</h4>
+                    <p className="text-xs text-[var(--neu-muted)] mt-1 leading-relaxed">{agent.scope}</p>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/60 flex items-center justify-between text-[10px] font-mono text-[var(--neu-muted)]">
+                    <span>Timeout: {agent.timeout_ms}ms</span>
+                    <span className="text-[var(--neu-green)] font-semibold">Active</span>
+                  </div>
+                </NeuCard>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: Database Schema (8 Tables) */}
+      {activeTab === 'schema' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            {
+              name: 'tenants',
+              desc: 'Multi-tenant registry with rate-limit and tier configurations',
+              fields: ['id UUID PK', 'name VARCHAR(255)', 'active BOOLEAN', 'tier VARCHAR', 'rate_limit INT'],
+            },
+            {
+              name: 'users',
+              desc: 'Platform operators and merchant users with Argon2 hashes',
+              fields: ['id UUID PK', 'tenant_id UUID FK', 'email VARCHAR UNIQUE', 'role VARCHAR', 'active BOOLEAN'],
+            },
+            {
+              name: 'transactions',
+              desc: 'Inbound payment records with state machine status and correlation IDs',
+              fields: ['id UUID PK', 'amount NUMERIC(14,4)', 'currency VARCHAR', 'status VARCHAR', 'idempotency_key UUID UNIQUE'],
+            },
+            {
+              name: 'policy_rules',
+              desc: 'Versioned deterministic evaluation predicates',
+              fields: ['id VARCHAR PK', 'version VARCHAR', 'description TEXT', 'priority INT', 'rule_predicate JSONB'],
+            },
+            {
+              name: 'policy_decisions',
+              desc: 'Persisted ALLOW / DENY / STEP_UP / MANUAL_REVIEW outcomes',
+              fields: ['id UUID PK', 'transaction_id UUID FK', 'decision VARCHAR', 'policy_version VARCHAR', 'reason_codes TEXT[]'],
+            },
+            {
+              name: 'agent_findings',
+              desc: 'Structured findings produced by the 13 specialist agents',
+              fields: ['id UUID PK', 'transaction_id UUID FK', 'agent_id INT', 'severity VARCHAR', 'confidence_value NUMERIC'],
+            },
+            {
+              name: 'audit_events',
+              desc: 'Immutable append-only forensic audit trail',
+              fields: ['id UUID PK', 'event_type VARCHAR', 'tenant_id UUID FK', 'correlation_id UUID', 'details JSONB'],
+            },
+            {
+              name: 'idempotency_keys',
+              desc: 'Request deduplication and mutation lock registry with 24h TTL',
+              fields: ['key UUID PK', 'tenant_id UUID FK', 'request_hash VARCHAR(64)', 'response_payload JSONB', 'expires_at TIMESTAMPTZ'],
+            },
+          ].map((table, idx) => (
+            <NeuCard key={idx} className="p-4 space-y-2">
+              <div className="flex items-center justify-between border-b border-white/60 pb-2">
+                <span className="font-mono text-xs font-black text-[var(--neu-blue)] flex items-center gap-1.5">
+                  <Database className="h-3.5 w-3.5" />
+                  {table.name}
+                </span>
+                <span className="text-[10px] text-[var(--neu-muted)] uppercase font-semibold">PostgreSQL</span>
+              </div>
+              <p className="text-xs text-[var(--neu-text)]">{table.desc}</p>
+              <div className="neu-inset-sm p-2.5 rounded-xl space-y-1 font-mono text-[11px] text-[var(--neu-muted)]">
+                {table.fields.map((f, i) => (
+                  <div key={i} className="flex items-center gap-1.5">
+                    <span className="h-1 w-1 rounded-full bg-[var(--neu-blue)]" />
+                    <span>{f}</span>
+                  </div>
+                ))}
+              </div>
+            </NeuCard>
+          ))}
+        </div>
+      )}
+
+      {/* TAB 4: STRIDE Threat Matrix */}
+      {activeTab === 'threats' && (
+        <div className="space-y-4">
+          {[
+            {
+              category: 'Spoofing',
+              threat: 'Forged tenant identifier in request body',
+              mitigation: 'Tenant identity extracted strictly from cryptographically verified JWT, never request body.',
+              severity: 'Critical',
+            },
+            {
+              category: 'Tampering',
+              threat: 'Replayed or out-of-order PayPal webhooks',
+              mitigation: 'Cryptographic signature verification + atomic deduplication via idempotency_keys table.',
+              severity: 'High',
+            },
+            {
+              category: 'Repudiation',
+              threat: 'Operator denies reviewing a flagged payment',
+              mitigation: 'Synchronous logging to immutable append-only audit_events table with trace context.',
+              severity: 'Medium',
+            },
+            {
+              category: 'Information Disclosure',
+              threat: 'Cardholder PAN or CVV logged in plaintext',
+              mitigation: 'Zero-storage invariant: platform never accepts, stores, or logs raw card PAN/CVVs.',
+              severity: 'Critical',
+            },
+            {
+              category: 'Denial of Service',
+              threat: 'Slow AI agent hanging checkout request',
+              mitigation: 'Hard 500ms Tokio timeouts per agent with graceful degradation to MANUAL_REVIEW.',
+              severity: 'High',
+            },
+            {
+              category: 'Elevation of Privilege',
+              threat: 'AI agent unilaterally executing payment refund',
+              mitigation: 'Agents have zero payment credentials. Only dedicated payment-paypal service can call PayPal.',
+              severity: 'Critical',
+            },
+          ].map((t, idx) => (
+            <NeuCard key={idx} className="p-4 flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-lg bg-white/70 text-[var(--neu-text)]">
+                    {t.category}
+                  </span>
+                  <span className="text-xs font-bold text-[var(--neu-text)]">{t.threat}</span>
+                </div>
+                <p className="text-xs text-[var(--neu-muted)] leading-relaxed pl-1">{t.mitigation}</p>
+              </div>
+
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0 ${
+                  t.severity === 'Critical'
+                    ? 'bg-rose-100 text-rose-600 border border-rose-300'
+                    : 'bg-amber-100 text-amber-700 border border-amber-300'
+                }`}
+              >
+                {t.severity}
+              </span>
+            </NeuCard>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
