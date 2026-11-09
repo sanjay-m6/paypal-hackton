@@ -1,0 +1,113 @@
+{
+  "description": "SYNTHETIC_DATASET: Multi-Agent Payment Security Platform Test Scenarios (Clearly labelled as synthetic per Rule 3.13)",
+  "scenarios": [
+    {
+      "id": "scenario_normal_allow_01",
+      "name": "Normal Verified Customer Checkout",
+      "expected_decision": "ALLOW",
+      "payload": {
+        "transaction_id": "11111111-1111-1111-1111-111111111111",
+        "tenant_id": "22222222-2222-2222-2222-222222222222",
+        "amount": "149.99",
+        "currency": "USD",
+        "payment_method": "PAYPAL",
+        "customer": {
+          "customer_id": "cust_alice_01",
+          "email": "alice.synthetic@example.com",
+          "ip_address": "198.51.100.12",
+          "country": "US",
+          "account_age_days": 180
+        },
+        "session": {
+          "session_id": "sess_verified_01",
+          "device_fingerprint": "fp_known_macos_chrome_991",
+          "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+          "is_proxy_or_vpn": false,
+          "client_timestamp": "2026-11-09T08:00:00Z"
+        },
+        "idempotency_key": "33333333-3333-3333-3333-333333333331"
+      }
+    },
+    {
+      "id": "scenario_stepup_mfa_02",
+      "name": "New Unrecognized Device Location",
+      "expected_decision": "STEP_UP",
+      "payload": {
+        "transaction_id": "11111111-1111-1111-1111-111111111112",
+        "tenant_id": "22222222-2222-2222-2222-222222222222",
+        "amount": "890.00",
+        "currency": "USD",
+        "payment_method": "PAYPAL",
+        "customer": {
+          "customer_id": "cust_bob_02",
+          "email": "bob.synthetic@example.com",
+          "ip_address": "203.0.113.88",
+          "country": "DE",
+          "account_age_days": 45
+        },
+        "session": {
+          "session_id": "sess_new_device_02",
+          "device_fingerprint": "fp_unrecognized_linux_812",
+          "user_agent": "Mozilla/5.0 (X11; Linux x86_64)",
+          "is_proxy_or_vpn": false,
+          "client_timestamp": "2026-11-09T08:05:00Z"
+        },
+        "idempotency_key": "33333333-3333-3333-3333-333333333332"
+      }
+    },
+    {
+      "id": "scenario_deny_proxy_fraud_03",
+      "name": "High-Risk Tor Exit Node & Rapid Velocity",
+      "expected_decision": "DENY",
+      "payload": {
+        "transaction_id": "11111111-1111-1111-1111-111111111113",
+        "tenant_id": "22222222-2222-2222-2222-222222222222",
+        "amount": "2499.00",
+        "currency": "USD",
+        "payment_method": "CARD",
+        "customer": {
+          "customer_id": "cust_suspicious_03",
+          "email": "disposable.addr@mailinator.com",
+          "ip_address": "185.220.101.5",
+          "country": "RU",
+          "account_age_days": 1
+        },
+        "session": {
+          "session_id": "sess_tor_exit_03",
+          "device_fingerprint": "fp_randomized_headless_003",
+          "user_agent": "HeadlessChrome/120.0.0.0",
+          "is_proxy_or_vpn": true,
+          "client_timestamp": "2026-11-09T08:10:00Z"
+        },
+        "idempotency_key": "33333333-3333-3333-3333-333333333333"
+      }
+    },
+    {
+      "id": "scenario_manual_review_04",
+      "name": "Merchant Volume Spike & Hesitant Behavior",
+      "expected_decision": "MANUAL_REVIEW",
+      "payload": {
+        "transaction_id": "11111111-1111-1111-1111-111111111114",
+        "tenant_id": "22222222-2222-2222-2222-222222222222",
+        "amount": "1250.00",
+        "currency": "EUR",
+        "payment_method": "PAYPAL",
+        "customer": {
+          "customer_id": "cust_charlie_04",
+          "email": "charlie.synthetic@example.com",
+          "ip_address": "198.51.100.200",
+          "country": "FR",
+          "account_age_days": 90
+        },
+        "session": {
+          "session_id": "sess_hesitant_04",
+          "device_fingerprint": "fp_windows_edge_554",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+          "is_proxy_or_vpn": false,
+          "client_timestamp": "2026-11-09T08:15:00Z"
+        },
+        "idempotency_key": "33333333-3333-3333-3333-333333333334"
+      }
+    }
+  ]
+}

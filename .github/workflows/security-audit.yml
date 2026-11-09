@@ -1,0 +1,32 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Weekly on Monday
+  pull_request:
+    branches: [main]
+
+jobs:
+  cargo-audit:
+    name: Dependency Vulnerability Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+      - name: Audit Rust dependencies
+        run: cd backend && cargo audit
+
+  secret-scan:
+    name: Secret & Credential Leak Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for leaked keys or tokens
+        run: |
+          # Verify no committed private keys or PayPal live credentials
+          if grep -rn "PAYPAL.*live" . --exclude-dir={target,node_modules,.git}; then
+            echo "ERROR: Potential live credential reference detected!"
+            exit 1
+          fi
+          echo "Secret scan passed."
