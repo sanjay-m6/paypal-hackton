@@ -1,0 +1,227 @@
+openapi: 3.1.0
+info:
+  title: Multi-Agent AI Payment Security Platform API
+  version: 1.0.0
+  description: >
+    Production-grade REST API for transaction risk evaluation, multi-agent intelligence,
+    deterministic policy decisions, and PayPal Sandbox payment orchestration.
+  contact:
+    name: Sanjay (Team Lead) & Kaviya (Full-Stack & AI)
+
+servers:
+  - url: http://127.0.0.1:3001
+    description: Local Development Axum Server
+
+paths:
+  /api/v1/health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  version:
+                    type: string
+                    example: 0.1.0
+
+  /api/v1/payments/evaluate:
+    post:
+      summary: Evaluate transaction risk via 13-agent ensemble and deterministic policy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentEvaluationRequest'
+      responses:
+        '200':
+          description: Evaluation complete with deterministic policy outcome
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentEvaluationResponse'
+        '400':
+          description: Malformed payload or validation error
+        '401':
+          description: Missing or invalid authentication token
+
+  /api/v1/payments/execute:
+    post:
+      summary: Execute payment through PayPal Sandbox (only permitted if policy decision is ALLOW)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentExecutionRequest'
+      responses:
+        '200':
+          description: Payment executed and confirmed via PayPal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentExecutionResponse'
+        '403':
+          description: Execution blocked by policy or unauthorized operation
+
+  /api/v1/agents:
+    get:
+      summary: List all 13 registered intelligence agents and capability descriptors
+      responses:
+        '200':
+          description: List of agent descriptors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentDescriptor'
+
+components:
+  schemas:
+    PaymentEvaluationRequest:
+      type: object
+      required:
+        - transaction_id
+        - tenant_id
+        - amount
+        - currency
+        - payment_method
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        amount:
+          type: string
+          example: "149.99"
+        currency:
+          type: string
+          enum: [USD, EUR, GBP, INR, JPY]
+        payment_method:
+          type: string
+          enum: [PAYPAL, CARD, BANK_TRANSFER]
+        customer:
+          type: object
+          properties:
+            customer_id:
+              type: string
+            email:
+              type: string
+            ip_address:
+              type: string
+            device_fingerprint:
+              type: string
+
+    PaymentEvaluationResponse:
+      type: object
+      required:
+        - transaction_id
+        - policy_decision
+        - reason_codes
+        - evaluated_at
+        - trace_id
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+        policy_decision:
+          type: string
+          enum: [ALLOW, DENY, STEP_UP, MANUAL_REVIEW]
+        reason_codes:
+          type: array
+          items:
+            type: string
+        policy_version:
+          type: string
+          example: "1.0.0"
+        evaluated_at:
+          type: string
+          format: date-time
+        trace_id:
+          type: string
+          format: uuid
+        agent_findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentFinding'
+
+    PaymentExecutionRequest:
+      type: object
+      required:
+        - transaction_id
+        - idempotency_key
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+        idempotency_key:
+          type: string
+          format: uuid
+
+    PaymentExecutionResponse:
+      type: object
+      required:
+        - transaction_id
+        - status
+        - paypal_order_id
+      properties:
+        transaction_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [CAPTURED, AUTHORIZED, FAILED]
+        paypal_order_id:
+          type: string
+        captured_amount:
+          type: string
+
+    AgentDescriptor:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+        name:
+          type: string
+          example: "Master Orchestrator"
+        version:
+          type: string
+          example: "1.0.0"
+        capabilities:
+          type: array
+          items:
+            type: string
+        timeout_ms:
+          type: integer
+          example: 500
+
+    AgentFinding:
+      type: object
+      properties:
+        agent_id:
+          type: string
+        finding_type:
+          type: string
+          enum: [observation, derived_feature, hypothesis, recommendation, alert]
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        evidence_refs:
+          type: array
+          items:
+            type: string
+            format: uuid
+
