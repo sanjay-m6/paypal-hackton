@@ -14,9 +14,9 @@
 | **02** | System Architecture & Technical Design | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-09 | 2026-11-09 |
 | **03** | Repository, Workspace & Dev Experience | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-09 | 2026-11-09 |
 | **04** | Database Architecture & Data Governance | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-09 | 2026-11-09 |
-| **05** | Authentication, Authorization & Tenant Isolation | Sanjay | Kaviya | 🧪 IMPLEMENTED (Awaiting Review) | 2026-11-10 | — |
-| **06** | Rust Backend Core & API Foundation | Sanjay | Kaviya | 🧪 IMPLEMENTED (Awaiting Review) | 2026-11-10 | — |
-| **07** | Agent Communication & Event Bus | Kaviya | Sanjay | 🔲 NOT STARTED | | |
+| **05** | Authentication, Authorization & Tenant Isolation | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-10 | 2026-11-10 |
+| **06** | Rust Backend Core & API Foundation | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-10 | 2026-11-10 |
+| **07** | Agent Communication & Event Bus | Kaviya | Sanjay | 🚀 READY | — | — |
 | **08** | Agent Identity & Capability Registry | Kaviya | Sanjay | 🔲 NOT STARTED | | |
 | **09** | Deterministic Policy & Decision Engine | Sanjay | Kaviya | 🔲 NOT STARTED | | |
 | **10** | Audit, Observability & Incident Telemetry | Sanjay | Kaviya | 🔲 NOT STARTED | | |
@@ -55,8 +55,8 @@
 
 ## Stage Milestones
 
-- **Stage A (Phases 1–5):** Foundation, Requirements, Architecture, Data Model, Auth & Tenancy
-- **Stage B (Phases 6–10):** Rust Core, Messaging, Agent Registry, Deterministic Policy Engine, Audit
+- **Stage A (Phases 1–5):** Foundation, Requirements, Architecture, Data Model, Auth & Tenancy — **✅ COMPLETE**
+- **Stage B (Phases 6–10):** Rust Core, Messaging, Agent Registry, Deterministic Policy Engine, Audit — **🚀 IN PROGRESS** (Phase 6 Complete)
 - **Stage C (Phases 11–17):** Master Orchestrator, Specialist Risk Agents, Risk Aggregation
 - **Stage D (Phases 18–24):** Payment & Commerce Intelligence Agents
 - **Stage E (Phases 25–30):** Historical Feature Store, Model Evaluation & Adversarial Testing
