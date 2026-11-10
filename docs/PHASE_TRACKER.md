@@ -53,6 +53,15 @@
 
 ---
 
+## Completion and Verification Notes
+
+- **Phases 01–06:** Marked complete in the project tracker. Phases 05 and 06 were approved by the project team in the latest tracker update.
+- **Phase 05 verification note:** PostgreSQL was unavailable during the last local verification run, so that run did not test bootstrap account creation, database-backed login, or the authenticated tenant-bound API flow end to end.
+- **Phase 06 scope boundary:** The API foundation is complete; live agent communication and specialist agents are subsequent phases. No policy rules are configured yet, so evaluation safely returns `MANUAL_REVIEW`. Persistent audit storage and payment execution are also subsequent work.
+- **Last automated checks:** `cargo test --workspace` and `npm run build` passed on 2026-11-10. These checks do not by themselves verify database-backed behavior.
+
+---
+
 ## Stage Milestones
 
 - **Stage A (Phases 1–5):** Foundation, Requirements, Architecture, Data Model, Auth & Tenancy — **✅ COMPLETE**
