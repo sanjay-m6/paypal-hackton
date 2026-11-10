@@ -129,6 +129,18 @@ export default function Phase2Architecture() {
       return
     }
 
+    if (accessToken === 'demo-dev-access-token') {
+      setAgents([
+        { id: 1, name: 'Transaction Pattern Analyst', version: '0.1.0', owner: 'Kaviya', scope: 'Velocity, Amount Anomaly', capabilities: ['RAPID_VELOCITY', 'AMOUNT_SPIKE'], timeout_ms: 500 },
+        { id: 2, name: 'Identity Verification Intelligence', version: '0.1.0', owner: 'Kaviya', scope: 'Email & Device Profiling', capabilities: ['EMAIL_AGE', 'DEVICE_FINGERPRINT'], timeout_ms: 500 },
+        { id: 3, name: 'Merchant Risk Intelligence', version: '0.1.0', owner: 'Kaviya', scope: 'Category & Volume Spikes', capabilities: ['CHARGEBACK_SPIKE', 'MCC_RISK'], timeout_ms: 500 },
+        { id: 4, name: 'Device & Session Intelligence', version: '0.1.0', owner: 'Kaviya', scope: 'Tor, Proxy, VPN Detection', capabilities: ['TOR_EXIT_NODE', 'GEO_MISMATCH'], timeout_ms: 500 },
+        { id: 5, name: 'Behavior Sequence Monitor', version: '0.1.0', owner: 'Kaviya', scope: 'Hesitation, Typing Dynamics', capabilities: ['AUTOMATION_BOT', 'RAPID_SUBMIT'], timeout_ms: 500 },
+      ])
+      setLoadingAgents(false)
+      return
+    }
+
     axios
       .get<AgentDescriptor[]>(`${API_BASE_URL}/api/v1/agents`, {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -148,6 +160,15 @@ export default function Phase2Architecture() {
     event.preventDefault()
     setLoggingIn(true)
     setLoginError(null)
+
+    if (loginEmail === 'admin@example.com' && loginPassword === 'AdminPassword123!') {
+      setAccessToken('demo-dev-access-token')
+      setTenantId('22222222-2222-4222-8222-222222222222')
+      setLoginPassword('')
+      setLoadingAgents(false)
+      setLoggingIn(false)
+      return
+    }
 
     try {
       const response = await axios.post<LoginResponse>(`${API_BASE_URL}/api/v1/auth/login`, {
@@ -175,6 +196,22 @@ export default function Phase2Architecture() {
     setApiError(null)
     const evalAmount = customAmount || amount
     const evalEmail = customEmail || email
+
+    if (accessToken === 'demo-dev-access-token') {
+      setTimeout(() => {
+        setEvaluationResult({
+          transaction_id: '11111111-1111-1111-1111-111111111111',
+          policy_decision: 'MANUAL_REVIEW',
+          reason_codes: ['no_rules_configured', 'demo_fallback'],
+          policy_version: '0.1.0',
+          agent_findings: [],
+          evaluated_at: new Date().toISOString(),
+          correlation_id: '44444444-4444-4444-4444-444444444444',
+        })
+        setEvaluating(false)
+      }, 300)
+      return
+    }
 
     try {
       const res = await axios.post<EvaluationResult>(`${API_BASE_URL}/api/v1/payments/evaluate`, {
@@ -213,9 +250,21 @@ export default function Phase2Architecture() {
         <NeuCard className="space-y-5 p-7">
           <div>
             <h2 className="text-xl font-black text-[var(--neu-text)]">Operator sign in</h2>
-            <p className="mt-2 text-sm text-[var(--neu-muted)]">
-              Use an operator account provisioned in the backend.
+            <p className="mt-2 text-xs text-[var(--neu-muted)]">
+              Phase 5 Authentication Gate. Use provisioned operator credentials or the default demo account below.
             </p>
+
+            <div className="mt-3 p-3.5 rounded-2xl bg-white/60 border border-white space-y-1.5 text-xs font-mono">
+              <div className="text-[10px] uppercase font-bold text-[var(--neu-muted)]">Default Credentials:</div>
+              <div className="flex justify-between items-center text-[var(--neu-text)]">
+                <span className="text-[var(--neu-muted)]">Email:</span>
+                <span className="font-bold text-[var(--neu-blue)]">admin@example.com</span>
+              </div>
+              <div className="flex justify-between items-center text-[var(--neu-text)]">
+                <span className="text-[var(--neu-muted)]">Password:</span>
+                <span className="font-bold text-[var(--neu-blue)]">AdminPassword123!</span>
+              </div>
+            </div>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <NeuInput
@@ -223,7 +272,7 @@ export default function Phase2Architecture() {
               autoComplete="username"
               value={loginEmail}
               onChange={(event) => setLoginEmail(event.target.value)}
-              placeholder="Email"
+              placeholder="Email (admin@example.com)"
               aria-label="Operator email"
               required
             />
@@ -232,14 +281,35 @@ export default function Phase2Architecture() {
               autoComplete="current-password"
               value={loginPassword}
               onChange={(event) => setLoginPassword(event.target.value)}
-              placeholder="Password"
+              placeholder="Password (AdminPassword123!)"
               aria-label="Operator password"
               required
             />
             {loginError && <p role="alert" className="text-sm text-red-600">{loginError}</p>}
             {apiError && <p role="alert" className="text-sm text-red-600">{apiError}</p>}
-            <NeuButton type="submit" disabled={loggingIn} className="w-full">
+            <NeuButton type="submit" disabled={loggingIn} className="w-full font-bold">
               {loggingIn ? 'Signing in…' : 'Sign in'}
+            </NeuButton>
+
+            <div className="relative flex py-1 items-center">
+              <div className="flex-grow border-t border-black/10"></div>
+              <span className="flex-shrink mx-2 text-[10px] font-bold text-[var(--neu-muted)] uppercase">or</span>
+              <div className="flex-grow border-t border-black/10"></div>
+            </div>
+
+            <NeuButton
+              type="button"
+              variant="raised"
+              onClick={() => {
+                setLoginEmail('admin@example.com')
+                setLoginPassword('AdminPassword123!')
+                setAccessToken('demo-dev-access-token')
+                setTenantId('22222222-2222-4222-8222-222222222222')
+                setLoadingAgents(false)
+              }}
+              className="w-full text-xs font-bold"
+            >
+              One-Click Demo Operator Sign In
             </NeuButton>
           </form>
         </NeuCard>
