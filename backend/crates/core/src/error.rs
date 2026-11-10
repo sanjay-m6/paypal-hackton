@@ -19,6 +19,9 @@ pub enum PlatformError {
     #[error("Tenant isolation violation: {0}")]
     TenantIsolation(String),
 
+    #[error("Security violation: {0}")]
+    SecurityViolation(String),
+
     #[error("Policy violation: {0}")]
     PolicyViolation(String),
 
@@ -51,6 +54,7 @@ impl PlatformError {
             Self::Unauthorized(_) => "Authentication is required.",
             Self::Forbidden(_) => "You do not have permission to perform this action.",
             Self::TenantIsolation(_) => "Access denied.",
+            Self::SecurityViolation(_) => "A security validation failure occurred.",
             Self::PolicyViolation(_) => "The request was denied by policy.",
             Self::PaymentError(_) => "A payment processing error occurred.",
             Self::AgentError { .. } => "An internal analysis error occurred.",

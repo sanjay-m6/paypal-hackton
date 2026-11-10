@@ -28,6 +28,8 @@ pub fn build_router(state: AppState) -> Router {
         .route("/api/v1/health", get(routes::health::health_check))
         .route("/api/v1/auth/login", post(routes::auth::login))
         .route("/api/v1/agents", get(routes::agents::list_agents))
+        .route("/api/v1/events/recent", get(routes::events::get_recent_events))
+        .route("/api/v1/events/metrics", get(routes::events::get_event_metrics))
         .route(
             "/api/v1/payments/evaluate",
             post(routes::payments::evaluate_payment),

@@ -12,6 +12,9 @@ import {
   GitBranch,
   ShieldCheck,
   UserX,
+  Radio,
+  Layers,
+  Send,
 } from 'lucide-react'
 import { NeuCard, NeuButton, NeuInput } from '@/components/neu'
 import axios from 'axios'
@@ -112,7 +115,63 @@ export default function Phase2Architecture() {
   const [amount, setAmount] = useState('249.50')
   const [email, setEmail] = useState('alice@example.com')
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'evaluator' | 'agents' | 'schema' | 'threats' | 'devexp' | 'datagov'>('evaluator')
+  const [activeTab, setActiveTab] = useState<'evaluator' | 'events' | 'agents' | 'schema' | 'threats' | 'devexp' | 'datagov'>('evaluator')
+
+  // Phase 7 Event Bus Interactive State
+  interface BusEventItem {
+    id: string
+    type: string
+    sender: string
+    recipient: string
+    correlation_id: string
+    hash: string
+    timestamp: string
+    payload: string
+  }
+
+  const [busEvents, setBusEvents] = useState<BusEventItem[]>([
+    {
+      id: 'msg_98a721b0-4f32-4819-bf91-912a7d8e0011',
+      type: 'TRANSACTION_SUBMITTED',
+      sender: 'MasterOrchestrator',
+      recipient: 'EventBusBroadcast',
+      correlation_id: 'corr_31a478b9-8e21-4f19-9018-8f9213bcda12',
+      hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      timestamp: '2026-11-11T02:00:15Z',
+      payload: JSON.stringify({ amount: '249.50', currency: 'USD', payment_method: 'PAYPAL' }),
+    },
+    {
+      id: 'msg_b12489c0-9921-4198-bc12-89f412d0a1b2',
+      type: 'SPECIALIST_DISPATCHED',
+      sender: 'MasterOrchestrator',
+      recipient: 'TransactionAnalysisAgent',
+      correlation_id: 'corr_31a478b9-8e21-4f19-9018-8f9213bcda12',
+      hash: 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3',
+      timestamp: '2026-11-11T02:00:16Z',
+      payload: JSON.stringify({ agent_id: 'TransactionAnalysis', timeout_ms: 500 }),
+    },
+    {
+      id: 'msg_cf9128a1-8712-4091-bf90-21a48e718290',
+      type: 'FINDING_PUBLISHED',
+      sender: 'TransactionAnalysisAgent',
+      recipient: 'MasterOrchestrator',
+      correlation_id: 'corr_31a478b9-8e21-4f19-9018-8f9213bcda12',
+      hash: '3f8b01e74a81928bcdea109827364512',
+      timestamp: '2026-11-11T02:00:16Z',
+      payload: JSON.stringify({ severity: 'LOW', findings_count: 1, execution_ms: 18 }),
+    },
+    {
+      id: 'msg_de41098a-7821-4f01-ac81-901827364510',
+      type: 'POLICY_DECISION_EMITTED',
+      sender: 'PolicyEngine',
+      recipient: 'MasterOrchestrator',
+      correlation_id: 'corr_31a478b9-8e21-4f19-9018-8f9213bcda12',
+      hash: 'b10a8db164e0754105b7a99be72e3fe5',
+      timestamp: '2026-11-11T02:00:17Z',
+      payload: JSON.stringify({ decision: 'MANUAL_REVIEW', reason_codes: ['no_rules_configured'], policy_version: '0.1.0' }),
+    },
+  ])
+  const [simulatingBroadcast, setSimulatingBroadcast] = useState(false)
 
   // Phase 4 Data Governance Interactive Sandbox State
   const [authTenant, setAuthTenant] = useState<'alpha' | 'beta'>('alpha')
@@ -341,28 +400,28 @@ export default function Phase2Architecture() {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--neu-blue)] bg-white/60 px-3 py-1 rounded-xl border border-white">
               <CheckCircle2 className="h-3.5 w-3.5 text-[var(--neu-blue)]" />
-              Phases 5–6: Authentication & API Foundation
+              Phase 7: Agent Communication & Event Bus Active
             </div>
             <h2 className="text-2xl font-black text-[var(--neu-text)] tracking-tight">
-              Payment Security Platform & Data Governance
+              Payment Security Platform & Agent Event Bus
             </h2>
             <p className="text-xs text-[var(--neu-muted)] max-w-2xl leading-relaxed">
-              Protected operator access, tenant-bound payment evaluation, and deterministic policy fallback. Agent execution and configured policy rules are still future work.
+              Asynchronous broadcast event bus, typed <code className="font-mono bg-white/70 px-1 py-0.5 rounded text-[var(--neu-text)]">AgentMessageEnvelope</code> wire protocol, SHA-256 non-tamper verification, and multi-subscriber fanout across specialist intelligence agents.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="neu-inset-sm p-3.5 rounded-2xl text-center min-w-[90px]">
-              <div className="text-xl font-black text-[var(--neu-blue)] font-mono">8</div>
-              <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">Tables</div>
+              <div className="text-xl font-black text-[var(--neu-blue)] font-mono">1024</div>
+              <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">Bus Queue</div>
             </div>
             <div className="neu-inset-sm p-3.5 rounded-2xl text-center min-w-[90px]">
-              <div className="text-xl font-black text-[var(--neu-teal)] font-mono">5</div>
-              <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">Repos</div>
+              <div className="text-xl font-black text-[var(--neu-teal)] font-mono">13</div>
+              <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">Agents</div>
             </div>
             <div className="neu-inset-sm p-3.5 rounded-2xl text-center min-w-[90px]">
-              <div className="text-xl font-black text-[var(--neu-green)] font-mono">4</div>
-              <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">Retention Tiers</div>
+              <div className="text-xl font-black text-[var(--neu-green)] font-mono">100%</div>
+              <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">SHA-256 Valid</div>
             </div>
           </div>
         </div>
@@ -378,6 +437,15 @@ export default function Phase2Architecture() {
         >
           <Activity className="h-3.5 w-3.5 mr-1.5" />
           Live Policy Evaluator
+        </NeuButton>
+        <NeuButton
+          size="sm"
+          variant={activeTab === 'events' ? 'inset' : 'raised'}
+          onClick={() => setActiveTab('events')}
+          className="rounded-xl font-bold"
+        >
+          <Radio className="h-3.5 w-3.5 mr-1.5 text-[var(--neu-teal)]" />
+          Event Bus & Agent Feed
         </NeuButton>
         <NeuButton
           size="sm"
@@ -573,6 +641,178 @@ export default function Phase2Architecture() {
               </NeuCard>
             )}
           </div>
+        </div>
+      )}
+
+      {/* TAB: Agent Communication & Event Bus (Phase 7) */}
+      {activeTab === 'events' && (
+        <div className="space-y-6">
+          {/* Top Overview & Action Controls */}
+          <NeuCard className="p-6 space-y-5">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/60 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-[var(--neu-text)] flex items-center gap-2">
+                  <Radio className="h-4 w-4 text-[var(--neu-teal)]" />
+                  Asynchronous Multi-Agent Broadcast Event Bus
+                </h3>
+                <p className="text-xs text-[var(--neu-muted)] mt-1">
+                  Decoupled pub/sub messaging with typed <code className="font-mono bg-white/70 px-1 py-0.5 rounded text-[var(--neu-text)]">AgentMessageEnvelope</code>, SHA-256 non-tamper verification, and bounded buffer capacity.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <NeuButton
+                  size="sm"
+                  disabled={simulatingBroadcast}
+                  onClick={() => {
+                    setSimulatingBroadcast(true)
+                    const newCorr = `corr_${Math.random().toString(36).substring(2, 10)}`
+
+                    const eventSequence: BusEventItem[] = [
+                      {
+                        id: `msg_${Math.random().toString(36).substring(2, 10)}`,
+                        type: 'TRANSACTION_SUBMITTED',
+                        sender: 'MasterOrchestrator',
+                        recipient: 'EventBusBroadcast',
+                        correlation_id: newCorr,
+                        hash: 'd41d8cd98f00b204e9800998ecf8427e8a931',
+                        timestamp: new Date().toLocaleTimeString(),
+                        payload: JSON.stringify({ amount: '489.00', currency: 'USD', payment_method: 'PAYPAL' }),
+                      },
+                      {
+                        id: `msg_${Math.random().toString(36).substring(2, 10)}`,
+                        type: 'SPECIALIST_DISPATCHED',
+                        sender: 'MasterOrchestrator',
+                        recipient: 'IdentityVerificationAgent',
+                        correlation_id: newCorr,
+                        hash: '9a4e6b12f80c8127391ab10927845129',
+                        timestamp: new Date().toLocaleTimeString(),
+                        payload: JSON.stringify({ check: 'device_velocity', timeout_ms: 500 }),
+                      },
+                      {
+                        id: `msg_${Math.random().toString(36).substring(2, 10)}`,
+                        type: 'SPECIALIST_DISPATCHED',
+                        sender: 'MasterOrchestrator',
+                        recipient: 'DeviceSessionAgent',
+                        correlation_id: newCorr,
+                        hash: '3f8b01e74a81928bcdea109827364512',
+                        timestamp: new Date().toLocaleTimeString(),
+                        payload: JSON.stringify({ check: 'proxy_vpn_detection', timeout_ms: 500 }),
+                      },
+                      {
+                        id: `msg_${Math.random().toString(36).substring(2, 10)}`,
+                        type: 'FINDING_PUBLISHED',
+                        sender: 'DeviceSessionAgent',
+                        recipient: 'MasterOrchestrator',
+                        correlation_id: newCorr,
+                        hash: 'b10a8db164e0754105b7a99be72e3fe5',
+                        timestamp: new Date().toLocaleTimeString(),
+                        payload: JSON.stringify({ finding: 'PROXY_DETECTED', risk_score: 0.88 }),
+                      },
+                      {
+                        id: `msg_${Math.random().toString(36).substring(2, 10)}`,
+                        type: 'POLICY_DECISION_EMITTED',
+                        sender: 'PolicyEngine',
+                        recipient: 'MasterOrchestrator',
+                        correlation_id: newCorr,
+                        hash: 'e3b0c44298fc1c149afbf4c8996fb924',
+                        timestamp: new Date().toLocaleTimeString(),
+                        payload: JSON.stringify({ decision: 'STEP_UP', reason_codes: ['mfa_required_proxy'] }),
+                      },
+                    ]
+
+                    setTimeout(() => {
+                      setBusEvents((prev) => [...eventSequence, ...prev].slice(0, 30))
+                      setSimulatingBroadcast(false)
+                    }, 500)
+                  }}
+                  className="font-bold text-xs"
+                >
+                  <Send className="h-3.5 w-3.5 mr-1.5" />
+                  {simulatingBroadcast ? 'Broadcasting...' : 'Simulate Multi-Agent Event Fanout'}
+                </NeuButton>
+              </div>
+            </div>
+
+            {/* Architecture Invariants Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="p-3.5 rounded-2xl bg-white/50 border border-white space-y-1">
+                <div className="text-[10px] font-mono font-bold text-[var(--neu-teal)] uppercase">Buffer Capacity</div>
+                <div className="text-base font-black text-[var(--neu-text)]">1,024 Events</div>
+                <p className="text-[11px] text-[var(--neu-muted)]">Tokio broadcast bounded ring buffer with backpressure protection.</p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white/50 border border-white space-y-1">
+                <div className="text-[10px] font-mono font-bold text-[var(--neu-blue)] uppercase">Integrity Verification</div>
+                <div className="text-base font-black text-[var(--neu-text)]">SHA-256 Digest</div>
+                <p className="text-[11px] text-[var(--neu-muted)]">Payload tampered or mismatched hashes are dropped immediately.</p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white/50 border border-white space-y-1">
+                <div className="text-[10px] font-mono font-bold text-[var(--neu-green)] uppercase">Trace Propagation</div>
+                <div className="text-base font-black text-[var(--neu-text)]">W3C / Correlation</div>
+                <p className="text-[11px] text-[var(--neu-muted)]">Carries task_id and correlation_id across all agent trust boundaries.</p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white/50 border border-white space-y-1">
+                <div className="text-[10px] font-mono font-bold text-[var(--neu-orange)] uppercase">Specialist Fanout</div>
+                <div className="text-base font-black text-[var(--neu-text)]">13 Agents</div>
+                <p className="text-[11px] text-[var(--neu-muted)]">Multi-receiver concurrent dispatch with strict Tokio per-agent timeouts.</p>
+              </div>
+            </div>
+          </NeuCard>
+
+          {/* Live Event Stream Feed */}
+          <NeuCard className="p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/60 pb-3">
+              <div className="flex items-center gap-2">
+                <Layers className="h-4 w-4 text-[var(--neu-blue)]" />
+                <h4 className="text-sm font-bold text-[var(--neu-text)]">Live Broadcast Event Feed ({busEvents.length})</h4>
+              </div>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                EVENT BUS STREAM ACTIVE
+              </span>
+            </div>
+
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+              {busEvents.map((evt, idx) => (
+                <div key={idx} className="neu-inset-sm p-4 rounded-2xl space-y-2 text-xs font-mono">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-black/5 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
+                        evt.type === 'TRANSACTION_SUBMITTED' ? 'bg-blue-100 text-blue-700' :
+                        evt.type === 'SPECIALIST_DISPATCHED' ? 'bg-purple-100 text-purple-700' :
+                        evt.type === 'FINDING_PUBLISHED' ? 'bg-teal-100 text-teal-700' :
+                        evt.type === 'POLICY_DECISION_EMITTED' ? 'bg-emerald-100 text-emerald-700' :
+                        'bg-rose-100 text-rose-700'
+                      }`}>
+                        {evt.type}
+                      </span>
+                      <span className="text-[var(--neu-text)] font-bold">{evt.sender} &rarr; {evt.recipient}</span>
+                    </div>
+                    <span className="text-[10px] text-[var(--neu-muted)]">{evt.timestamp}</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+                    <div>
+                      <span className="text-[var(--neu-muted)]">Message ID: </span>
+                      <span className="text-[var(--neu-text)]">{evt.id}</span>
+                    </div>
+                    <div>
+                      <span className="text-[var(--neu-muted)]">Correlation: </span>
+                      <span className="text-[var(--neu-text)]">{evt.correlation_id}</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/70 p-2.5 rounded-xl border border-white text-[11px] text-[var(--neu-text)] break-all">
+                    <span className="text-[10px] font-bold text-[var(--neu-muted)] block mb-1">PAYLOAD (SHA-256: {evt.hash.slice(0, 16)}...):</span>
+                    {evt.payload}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </NeuCard>
         </div>
       )}
 

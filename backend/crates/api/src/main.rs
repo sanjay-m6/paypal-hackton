@@ -61,6 +61,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         auth,
         policy_engine: Arc::new(PolicyEngine::new()),
         agent_registry: Arc::new(AgentRegistry::new()),
+        event_bus: Arc::new(payment_agents::event_bus::EventBus::new()),
         audit_logger: Arc::new(AuditLogger::new()),
     };
     let app = build_router(state);

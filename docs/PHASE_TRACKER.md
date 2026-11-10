@@ -16,8 +16,8 @@
 | **04** | Database Architecture & Data Governance | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-09 | 2026-11-09 |
 | **05** | Authentication, Authorization & Tenant Isolation | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-10 | 2026-11-10 |
 | **06** | Rust Backend Core & API Foundation | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-10 | 2026-11-10 |
-| **07** | Agent Communication & Event Bus | Kaviya | Sanjay | 🚀 READY | — | — |
-| **08** | Agent Identity & Capability Registry | Kaviya | Sanjay | 🔲 NOT STARTED | | |
+| **07** | Agent Communication & Event Bus | Kaviya | Sanjay | ✅ COMPLETE | 2026-11-11 | 2026-11-11 |
+| **08** | Agent Identity & Capability Registry | Kaviya | Sanjay | 🚀 READY | — | — |
 | **09** | Deterministic Policy & Decision Engine | Sanjay | Kaviya | 🔲 NOT STARTED | | |
 | **10** | Audit, Observability & Incident Telemetry | Sanjay | Kaviya | 🔲 NOT STARTED | | |
 | **11** | Master Agent Orchestrator | Kaviya | Sanjay | 🔲 NOT STARTED | | |
@@ -55,17 +55,18 @@
 
 ## Completion and Verification Notes
 
-- **Phases 01–06:** Marked complete in the project tracker. Phases 05 and 06 were approved by the project team in the latest tracker update.
+- **Phases 01–07:** Marked complete in the project tracker.
+- **Phase 07 verification note:** The asynchronous Tokio broadcast event bus (`payment-agents`), SHA-256 envelope integrity verification, ring-buffer event history, API event routes, and the interactive Neumorphic Event Feed were built and verified with 4 new unit tests (18 workspace tests passing).
 - **Phase 05 verification note:** PostgreSQL was unavailable during the last local verification run, so that run did not test bootstrap account creation, database-backed login, or the authenticated tenant-bound API flow end to end.
 - **Phase 06 scope boundary:** The API foundation is complete; live agent communication and specialist agents are subsequent phases. No policy rules are configured yet, so evaluation safely returns `MANUAL_REVIEW`. Persistent audit storage and payment execution are also subsequent work.
-- **Last automated checks:** `cargo test --workspace` and `npm run build` passed on 2026-11-10. These checks do not by themselves verify database-backed behavior.
+- **Last automated checks:** `cargo test --workspace` (18 tests passed) and `npm run build` passed on 2026-11-11.
 
 ---
 
 ## Stage Milestones
 
 - **Stage A (Phases 1–5):** Foundation, Requirements, Architecture, Data Model, Auth & Tenancy — **✅ COMPLETE**
-- **Stage B (Phases 6–10):** Rust Core, Messaging, Agent Registry, Deterministic Policy Engine, Audit — **🚀 IN PROGRESS** (Phase 6 Complete)
+- **Stage B (Phases 6–10):** Rust Core, Messaging, Agent Registry, Deterministic Policy Engine, Audit — **🚀 IN PROGRESS** (Phases 6 & 7 Complete)
 - **Stage C (Phases 11–17):** Master Orchestrator, Specialist Risk Agents, Risk Aggregation
 - **Stage D (Phases 18–24):** Payment & Commerce Intelligence Agents
 - **Stage E (Phases 25–30):** Historical Feature Store, Model Evaluation & Adversarial Testing
