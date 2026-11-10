@@ -55,6 +55,17 @@ interface LoginResponse {
   role: string
 }
 
+interface MessagingStatus {
+  enabled: boolean
+  connected: boolean
+  stream_ready: boolean
+  stream_name: string | null
+  dead_letter_stream_ready: boolean
+  dead_letter_stream_name: string | null
+  delivery_semantics: 'at_least_once'
+  workers_active: boolean
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001'
 
 // Synthetic scenarios from scripts/seed_data.json
@@ -100,6 +111,9 @@ const SYNTHETIC_SCENARIOS = [
 export default function Phase2Architecture() {
   const [agents, setAgents] = useState<AgentDescriptor[]>([])
   const [loadingAgents, setLoadingAgents] = useState(true)
+  const [messagingStatus, setMessagingStatus] = useState<MessagingStatus | null>(null)
+  const [messagingError, setMessagingError] = useState<string | null>(null)
+  const [loadingMessaging, setLoadingMessaging] = useState(false)
   const [evaluating, setEvaluating] = useState(false)
   const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
@@ -125,7 +139,6 @@ export default function Phase2Architecture() {
   // Fetch protected agent descriptors after a successful login.
   useEffect(() => {
     if (!accessToken) {
-      setLoadingAgents(false)
       return
     }
 
@@ -152,14 +165,46 @@ export default function Phase2Architecture() {
       .catch(() => {
         setApiError('Could not load protected API data. Please sign in again.')
         setAccessToken(null)
+        setMessagingStatus(null)
+        setMessagingError(null)
+        setLoadingMessaging(false)
       })
       .finally(() => setLoadingAgents(false))
+  }, [accessToken])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    if (!accessToken || accessToken === 'demo-dev-access-token') {
+      return
+    }
+
+    axios
+      .get<MessagingStatus>(`${API_BASE_URL}/api/v1/messaging/status`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        signal: controller.signal,
+      })
+      .then((response) => setMessagingStatus(response.data))
+      .catch((error: unknown) => {
+        if (!axios.isCancel(error)) {
+          setMessagingError('Messaging status could not be loaded.')
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setLoadingMessaging(false)
+        }
+      })
+
+    return () => controller.abort()
   }, [accessToken])
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setLoggingIn(true)
     setLoginError(null)
+    setMessagingStatus(null)
+    setMessagingError(null)
+    setLoadingMessaging(false)
 
     if (loginEmail === 'admin@example.com' && loginPassword === 'AdminPassword123!') {
       setAccessToken('demo-dev-access-token')
@@ -179,6 +224,7 @@ export default function Phase2Architecture() {
       setTenantId(response.data.tenant_id)
       setLoginPassword('')
       setLoadingAgents(true)
+      setLoadingMessaging(true)
     } catch {
       setLoginError('Sign-in failed. Check the credentials and API connection.')
     } finally {
@@ -306,6 +352,9 @@ export default function Phase2Architecture() {
                 setAccessToken('demo-dev-access-token')
                 setTenantId('22222222-2222-4222-8222-222222222222')
                 setLoadingAgents(false)
+                setMessagingStatus(null)
+                setMessagingError(null)
+                setLoadingMessaging(false)
               }}
               className="w-full text-xs font-bold"
             >
@@ -329,35 +378,73 @@ export default function Phase2Architecture() {
             setTenantId(null)
             setAgents([])
             setEvaluationResult(null)
+            setMessagingStatus(null)
+            setMessagingError(null)
+            setLoadingMessaging(false)
           }}
         >
           Sign out
         </button>
       </div>
       {apiError && <p role="alert" className="text-sm text-red-600">{apiError}</p>}
+      <NeuCard className="p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-[var(--neu-text)]">Phase 7 · Agent Messaging</h3>
+            <p className="mt-1 text-xs text-[var(--neu-muted)]">
+              At-least-once delivery; no specialist workers are running yet.
+            </p>
+          </div>
+          <div className="text-xs text-[var(--neu-muted)] sm:text-right">
+            {loadingMessaging ? (
+              <p>Checking broker status…</p>
+            ) : messagingError ? (
+              <p role="alert" className="text-red-600">{messagingError}</p>
+            ) : messagingStatus ? (
+              <>
+                <p>
+                  Broker: {messagingStatus.enabled
+                    ? messagingStatus.connected ? 'Connected' : 'Unavailable'
+                    : 'Disabled'}
+                </p>
+                <p>
+                  Stream: {messagingStatus.stream_name ?? 'Not configured'}
+                  {messagingStatus.stream_ready ? ' · ready' : ''}
+                </p>
+                <p>
+                  Dead-letter stream: {messagingStatus.dead_letter_stream_name ?? 'Not configured'}
+                  {messagingStatus.dead_letter_stream_ready ? ' · ready' : ''}
+                </p>
+              </>
+            ) : (
+              <p>Sign in with a real operator account to view broker status.</p>
+            )}
+          </div>
+        </div>
+      </NeuCard>
       {/* Platform Architecture & Data Governance Header */}
       <NeuCard className="p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--neu-blue)] bg-white/60 px-3 py-1 rounded-xl border border-white">
               <CheckCircle2 className="h-3.5 w-3.5 text-[var(--neu-blue)]" />
-              Phases 5–6: Authentication & API Foundation
+              Phases 5–7: Auth, API & Messaging Foundation
             </div>
             <h2 className="text-2xl font-black text-[var(--neu-text)] tracking-tight">
               Payment Security Platform & Data Governance
             </h2>
             <p className="text-xs text-[var(--neu-muted)] max-w-2xl leading-relaxed">
-              Protected operator access, tenant-bound payment evaluation, and deterministic policy fallback. Agent execution and configured policy rules are still future work.
+              Protected operator access, durable signed messaging, tenant-bound evaluation, and deterministic policy fallback. Specialist agents and configured policy rules are still future work.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <div className="neu-inset-sm p-3.5 rounded-2xl text-center min-w-[90px]">
-              <div className="text-xl font-black text-[var(--neu-blue)] font-mono">8</div>
+              <div className="text-xl font-black text-[var(--neu-blue)] font-mono">11</div>
               <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">Tables</div>
             </div>
             <div className="neu-inset-sm p-3.5 rounded-2xl text-center min-w-[90px]">
-              <div className="text-xl font-black text-[var(--neu-teal)] font-mono">5</div>
+              <div className="text-xl font-black text-[var(--neu-teal)] font-mono">6</div>
               <div className="text-[10px] font-bold text-[var(--neu-muted)] uppercase tracking-wider">Repos</div>
             </div>
             <div className="neu-inset-sm p-3.5 rounded-2xl text-center min-w-[90px]">
@@ -413,7 +500,7 @@ export default function Phase2Architecture() {
           className="rounded-xl font-bold"
         >
           <Database className="h-3.5 w-3.5 mr-1.5" />
-          Database Schema (8)
+          Database Schema (11)
         </NeuButton>
         <NeuButton
           size="sm"

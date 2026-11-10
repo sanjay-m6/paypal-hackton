@@ -7,6 +7,7 @@ members = [
     "crates/agents",
     "crates/paypal",
     "crates/audit",
+    "crates/messaging",
     "crates/api",
 ]
 
@@ -52,6 +53,10 @@ dotenvy = "0.15"
 
 # HTTP client (for PayPal)
 reqwest = { version = "0.12", features = ["json", "rustls-tls"] }
+async-nats = "0.52"
+hmac = "0.12"
+sha2 = "0.10"
+base64 = "0.22"
 
 # Testing
 tokio-test = "0.4"

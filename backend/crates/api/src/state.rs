@@ -3,6 +3,7 @@ use std::sync::Arc;
 use payment_agents::registry::AgentRegistry;
 use payment_audit::logger::AuditLogger;
 use payment_db::pool::DbPool;
+use payment_messaging::{JetStreamBus, MessageValidator};
 use payment_policy::engine::PolicyEngine;
 
 use crate::middleware::auth::AuthService;
@@ -20,4 +21,8 @@ pub struct AppState {
     pub agent_registry: Arc<AgentRegistry>,
     /// Structured audit logger for compliance events.
     pub audit_logger: Arc<AuditLogger>,
+    /// Optional durable message bus; disabled unless explicitly configured.
+    pub messaging: Option<Arc<JetStreamBus>>,
+    /// Validates signed agent envelopes before they are dispatched or published.
+    pub messaging_validator: Option<Arc<MessageValidator>>,
 }

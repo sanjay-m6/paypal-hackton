@@ -16,7 +16,7 @@
 | **04** | Database Architecture & Data Governance | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-09 | 2026-11-09 |
 | **05** | Authentication, Authorization & Tenant Isolation | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-10 | 2026-11-10 |
 | **06** | Rust Backend Core & API Foundation | Sanjay | Kaviya | ✅ COMPLETE | 2026-11-10 | 2026-11-10 |
-| **07** | Agent Communication & Event Bus | Kaviya | Sanjay | 🚀 READY | — | — |
+| **07** | Agent Communication & Event Bus | Kaviya | Sanjay | ⚙️ IN PROGRESS | 2026-11-10 | — |
 | **08** | Agent Identity & Capability Registry | Kaviya | Sanjay | 🔲 NOT STARTED | | |
 | **09** | Deterministic Policy & Decision Engine | Sanjay | Kaviya | 🔲 NOT STARTED | | |
 | **10** | Audit, Observability & Incident Telemetry | Sanjay | Kaviya | 🔲 NOT STARTED | | |
@@ -58,7 +58,10 @@
 - **Phases 01–06:** Marked complete in the project tracker. Phases 05 and 06 were approved by the project team in the latest tracker update.
 - **Phase 05 verification note:** PostgreSQL was unavailable during the last local verification run, so that run did not test bootstrap account creation, database-backed login, or the authenticated tenant-bound API flow end to end.
 - **Phase 06 scope boundary:** The API foundation is complete; live agent communication and specialist agents are subsequent phases. No policy rules are configured yet, so evaluation safely returns `MANUAL_REVIEW`. Persistent audit storage and payment execution are also subsequent work.
-- **Last automated checks:** `cargo test --workspace` and `npm run build` passed on 2026-11-10. These checks do not by themselves verify database-backed behavior.
+- **Phase 07 implemented:** Strict versioned message envelopes; HMAC signing and verification with key identity and revocation; schema, expiry, size, route, and context validation; JetStream publishing and durable consumers; bounded retries, timeouts, acknowledgements, and dead-letter handling; tenant-scoped inbox/outbox/dead-letter persistence and retention; inbox claims that skip processed duplicates; transactional persistence of successful task results to the outbox; outbox publishing; and an authenticated messaging-status API with a frontend panel.
+- **Phase 07 pending before completion:** Configure local PostgreSQL, NATS, and private `.env` values; apply and exercise the migration against PostgreSQL; run the API with messaging enabled and verify authenticated broker/stream status; exercise task delivery, duplicate suppression, retries, and dead-letter handling end to end; obtain Sanjay's review of the messaging contract, migration, and security-sensitive implementation; then record the observed results and get explicit phase approval. No production agent workers are registered; specialist workers are outside Phase 07's current scope.
+- **Phase 07 review:** Frontend-only review was completed and the visible UI was approved. This does not verify backend, PostgreSQL, or NATS behavior. Phase 07 remains **IN PROGRESS**; Phase 08 has not started.
+- **Last automated checks:** `cargo fmt --all -- --check`, `cargo test --workspace` (28 tests), and `npm run build` pass. `npm run lint` exits successfully with one existing React effect warning. Changed DB and messaging Clippy checks pass with one existing DB warning; prior changed API checks passed with the documented narrow exceptions for baseline warnings. Full live PostgreSQL/NATS integration was not run: Docker is unavailable, project database credentials are not configured in this workspace, and a NATS server is not installed. The API launch attempt stopped because `DATABASE_URL` was not configured.
 
 ---
 

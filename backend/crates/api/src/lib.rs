@@ -29,6 +29,10 @@ pub fn build_router(state: AppState) -> Router {
         .route("/api/v1/auth/login", post(routes::auth::login))
         .route("/api/v1/agents", get(routes::agents::list_agents))
         .route(
+            "/api/v1/messaging/status",
+            get(routes::messaging::messaging_status),
+        )
+        .route(
             "/api/v1/payments/evaluate",
             post(routes::payments::evaluate_payment),
         )

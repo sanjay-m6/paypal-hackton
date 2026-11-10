@@ -10,6 +10,8 @@ payment-policy = { path = "../policy" }
 payment-agents = { path = "../agents" }
 payment-paypal = { path = "../paypal" }
 payment-audit = { path = "../audit" }
+payment-messaging = { path = "../messaging" }
+chrono = { workspace = true }
 axum = { workspace = true }
 argon2 = { workspace = true }
 jsonwebtoken = { workspace = true }
